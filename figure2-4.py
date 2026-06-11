@@ -48,6 +48,7 @@ run_cox_experiment(
 experiment_name = "figure_3"
 n_patients_list = [250, 500]
 n_bootstraps = 1000
+batch_size = 2
 output_folder = Path("results/")
 n_iterations = 3
 
@@ -65,6 +66,7 @@ run_cox_experiment(
     covariate_specs=covariate_specs,
     package_device_dtype_list=package_device_dtype_list,
     n_bootstraps=n_bootstraps,
+    batch_size=batch_size,
     n_iterations=n_iterations,
 )
 
