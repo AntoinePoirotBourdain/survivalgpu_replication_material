@@ -496,7 +496,36 @@ def run_wce_experiment(
 
     df_results = []
 
-    print(f"\nStarting the WCE experiment '{experiment_name}' with scenario='{scenario}', HR_target={HR_target}, cutoff={cutoff}, n_knots_list={n_knots_list}, constrained={constrained}, n_bootstraps={n_bootstraps}, batch_size={batch_size}")
+    print(f"\n{'='*60}")
+    print(f"Starting the WCE experiment '{experiment_name}' with scenario='{scenario}', HR_target={HR_target}, cutoff={cutoff}, n_knots_list={n_knots_list}, constrained={constrained}, n_bootstraps={n_bootstraps}, batch_size={batch_size}")
+    print(f"{'='*60}")
+
+    print("\nWarming up packages with 500 patients...")
+    warmup_dataset = simulate_for_experiment(
+        n_patients=500,
+        max_time=max_time,
+        HR_target=HR_target,
+        scenario_name=scenario,
+        seed=seed,
+    )
+    for package, dtype, device in package_dtype_list:
+        print(f"  warming up {package} | dtype={dtype.__name__} | device={device}")
+        run_benchmark_bootstraps(
+            package_name=package,
+            start="start",
+            stop="stop",
+            patient_id="patients",
+            event="events",
+            dose="dose",
+            constrained=constrained,
+            dataset=warmup_dataset,
+            n_knots_list=n_knots_list,
+            cutoff=cutoff,
+            dtype=dtype,
+            batch_size=0,
+            n_bootstraps=0,
+            device=device,
+        )
 
     for dataset_idx, n_patients in enumerate(n_patients_list):
         dataset_seed = None if seed is None else seed + dataset_idx
@@ -509,20 +538,19 @@ def run_wce_experiment(
             seed=dataset_seed,
         )
         t_sim = time.time() - t_sim_start
-        print(f"\nn_patients={n_patients} | scenario={scenario} | "
-              f"HR_target={HR_target} | cutoff={cutoff}")
+        print(f"\n--- n_patients={n_patients} | scenario={scenario} | "
+              f"HR_target={HR_target} | cutoff={cutoff} ---")
         print(f"  dataset: {len(dataset)} rows, {dataset['patients'].nunique()} patients "
               f"| simulation time: {t_sim:.4f} seconds")
 
         for package, dtype, device in package_dtype_list:
-            print(f"  running {package} | dtype={dtype.__name__} | device={device} | n_iterations={n_iterations} ...")
+            print(f"  > {package} | dtype={dtype.__name__} | device={device} | n_iterations={n_iterations}")
 
             # survivalgpu+cuda runs the full n_bootstraps natively; all other cases
             # are already extrapolated inside run_benchmark_bootstraps.
 
             total_time = 0
             for i in range(n_iterations):
-                print(f"    iteration {i+1}/{n_iterations}...")
                 hr_result, coef_list, iter_time = run_benchmark_bootstraps(
                     package_name=package,
                     start="start",
@@ -540,9 +568,10 @@ def run_wce_experiment(
                     device=device,
                 )
                 total_time += iter_time
+                print(f"      iteration {i+1}/{n_iterations}: {iter_time:.4f} seconds")
 
             computation_time = total_time / n_iterations
-            print(f"  mean time over {n_iterations} iterations: {computation_time:.4f} seconds")
+            print(f"    mean time over {n_iterations} iterations: {computation_time:.4f} seconds")
 
             df_results.append({
                 "experiment_name" : experiment_name,

@@ -43,31 +43,18 @@ from survivalgpu import CoxPHSurvivalAnalysis, WCESurvivalAnalysis, simulate_dat
 
 CUDA_PACKAGES = ["survivalgpu", "torchsurv","xgboost"]
 
-_CONSTANT_COVARIATES = [
-    ConstantCovariate("constant_1",  coef=np.log(1.5),  values=[0, 1],          weights=[0.5, 0.5]),
-    ConstantCovariate("constant_2",  coef=np.log(1.2),  values=[0, 1, 2],       weights=[0.3, 0.4, 0.3]),
-    ConstantCovariate("constant_3",  coef=np.log(0.8),  values=[0, 1],          weights=[0.7, 0.3]),
-    ConstantCovariate("constant_4",  coef=np.log(1.3),  values=[0, 1, 2, 3],    weights=[0.1, 0.2, 0.3, 0.4]),
-    ConstantCovariate("constant_5",  coef=np.log(0.7),  values=[0, 1],          weights=[0.6, 0.4]),
-    ConstantCovariate("constant_6",  coef=np.log(1.4),  values=[0, 1, 2],       weights=[0.2, 0.5, 0.3]),
-    ConstantCovariate("constant_7",  coef=np.log(0.9),  values=[0, 1],          weights=[0.8, 0.2]),
-    ConstantCovariate("constant_8",  coef=np.log(1.1),  values=[0, 1, 2, 3],    weights=[0.25, 0.25, 0.25, 0.25]),
-    ConstantCovariate("constant_9",  coef=np.log(0.85), values=[0, 1],          weights=[0.55, 0.45]),
-    ConstantCovariate("constant_10", coef=np.log(1.25), values=[0, 1, 2],       weights=[0.4, 0.4, 0.2]),
-]
+def make_constant_covariates(n, coef_list):
+    return [
+        ConstantCovariate(f"constant_{i+1}", coef=coef_list[i], values=[0, 1], weights=[0.5, 0.5])
+        for i in range(n)
+    ]
 
-_TD_COVARIATES = [
-    TimeDependentCovariate("time_dep_1",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(2.0)),
-    TimeDependentCovariate("time_dep_2",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(0.5)),
-    TimeDependentCovariate("time_dep_3",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(1.5)),
-    TimeDependentCovariate("time_dep_4",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(0.7)),
-    TimeDependentCovariate("time_dep_5",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(1.8)),
-    TimeDependentCovariate("time_dep_6",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(0.6)),
-    TimeDependentCovariate("time_dep_7",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(1.3)),
-    TimeDependentCovariate("time_dep_8",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(0.8)),
-    TimeDependentCovariate("time_dep_9",  values=[0.5, 1.0, 1.5, 2.0], coef=np.log(1.6)),
-    TimeDependentCovariate("time_dep_10", values=[0.5, 1.0, 1.5, 2.0], coef=np.log(0.9)),
-]
+
+def make_td_covariates(n, coef_list):
+    return [
+        TimeDependentCovariate(f"time_dep_{i+1}", values=[0.5, 1.0, 1.5, 2.0], coef=coef_list[i])
+        for i in range(n)
+    ]
 
 
 def open_dataset(n_patients, n_constant_covariates, n_time_dependent_covariates, compressed = True):
@@ -395,6 +382,7 @@ def run_cox_experiment(
     n_patients_list,
     covariate_combination,
     package_device_dtype_list,
+    beta_candidates,
     n_bootstraps=0,
     batch_size=0,
     n_iterations=3,
@@ -414,14 +402,42 @@ def run_cox_experiment(
 
     df_results = []
 
-    print(f"\nStarting Cox experiment '{experiment_name}' | n_bootstraps={n_bootstraps} | n_iterations={n_iterations}")
+    print(f"\n{'='*60}")
+    print(f"Starting Cox experiment '{experiment_name}' | n_bootstraps={n_bootstraps} | n_iterations={n_iterations}")
+    print(f"{'='*60}")
+
+    rng = np.random.default_rng(seed=seed)
+
+    print("\nWarming up packages with 500 patients...")
+    warmup_dataset = simulate_dataset(
+        max_time=max_time,
+        n_patients=500,
+        list_covariates=make_constant_covariates(1, rng.choice(beta_candidates, size=1)),
+        compress=True,
+        seed=seed,
+    )
+    for package, device, dtype in package_device_dtype_list:
+        print(f"  warming up {package} | dtype={dtype.__name__} | device={device}")
+        run_benchmark_bootstraps(
+            package_name = package,
+            start        = None,
+            stop         = "stop",
+            event        = "events",
+            covariates   = ["constant_1"],
+            dataset      = warmup_dataset,
+            ties         = "breslow",
+            batch_size   = 0,
+            n_bootstraps = 0,
+            device       = device,
+            dtype        = dtype,
+        )
 
     for dataset_idx, (n_patients, (n_constant, n_time_dep)) in enumerate(
         itertools.product(n_patients_list, covariate_combination)
     ):
         covariate_list = (
-            _CONSTANT_COVARIATES[:n_constant]
-            + _TD_COVARIATES[:n_time_dep]
+            make_constant_covariates(n_constant, rng.choice(beta_candidates, size=n_constant))
+            + make_td_covariates(n_time_dep, rng.choice(beta_candidates, size=n_time_dep))
         )
         covariate_names = (
             [f"constant_{j+1}" for j in range(n_constant)]
@@ -439,15 +455,16 @@ def run_cox_experiment(
         )
         t_sim = time.time() - t_sim_start
 
-        print(f"\nn_patients={n_patients} | n_constant={n_constant} | n_time_dep={n_time_dep}")
+        print(f"\n--- n_patients={n_patients} | n_constant={n_constant} | n_time_dep={n_time_dep} ---")
+        for cov in covariate_list:
+            print(f"  {cov.name}: beta={cov.coef:.4f}")
         print(f"  dataset: {len(dataset)} rows | simulation time: {t_sim:.4f} seconds")
 
         for package, device, dtype in package_device_dtype_list:
-            print(f"  running {package} | dtype={dtype.__name__} | device={device} | n_iterations={n_iterations} ...")
+            print(f"  > {package} | dtype={dtype.__name__} | device={device} | n_iterations={n_iterations}")
 
             total_time = 0
             for i in range(n_iterations):
-                print(f"    iteration {i+1}/{n_iterations}...")
                 coef_list, iter_time = run_benchmark_bootstraps(
                     package_name = package,
                     start        = "start" if n_time_dep > 0 else None,
@@ -462,9 +479,10 @@ def run_cox_experiment(
                     dtype        = dtype,
                 )
                 total_time += iter_time
+                print(f"      iteration {i+1}/{n_iterations}: {iter_time:.4f} seconds")
 
             computation_time = total_time / n_iterations
-            print(f"  mean time over {n_iterations} iterations: {computation_time:.4f} seconds")
+            print(f"    mean time over {n_iterations} iterations: {computation_time:.4f} seconds")
 
             df_results.append({
                 "experiment_name"             : experiment_name,
@@ -593,11 +611,6 @@ def build_covariates_with_betas(
     if total_cov < 1:
         raise ValueError("At least one covariate is required.")
 
-    if n_constant > len(_CONSTANT_COVARIATES):
-        raise ValueError(f"n_constant={n_constant} exceeds available templates ({len(_CONSTANT_COVARIATES)}).")
-    if n_time_dep > len(_TD_COVARIATES):
-        raise ValueError(f"n_time_dep={n_time_dep} exceeds available templates ({len(_TD_COVARIATES)}).")
-
     if len(first_covariate_beta_list) < 1:
         raise ValueError("first_covariate_beta_list must contain at least 1 value.")
 
@@ -610,37 +623,12 @@ def build_covariates_with_betas(
 
     beta_all = [first_covariate_beta_list[0]] + list(other_covariates_beta_list[:expected_other_betas])
 
-    covariates = []
-    covariate_names = []
-    true_betas = []
+    constant_betas = beta_all[:n_constant]
+    td_betas = beta_all[n_constant:]
 
-    k = 0
-    for i in range(n_constant):
-        tmpl = _CONSTANT_COVARIATES[i]
-        covariates.append(
-            ConstantCovariate(
-                tmpl.name,
-                coef=beta_all[k],
-                values=tmpl.values,
-                weights=tmpl.weights,
-            )
-        )
-        covariate_names.append(tmpl.name)
-        true_betas.append(beta_all[k])
-        k += 1
-
-    for i in range(n_time_dep):
-        tmpl = _TD_COVARIATES[i]
-        covariates.append(
-            TimeDependentCovariate(
-                tmpl.name,
-                values=tmpl.values,
-                coef=beta_all[k],
-            )
-        )
-        covariate_names.append(tmpl.name)
-        true_betas.append(beta_all[k])
-        k += 1
+    covariates = make_constant_covariates(n_constant, constant_betas) + make_td_covariates(n_time_dep, td_betas)
+    covariate_names = [c.name for c in covariates]
+    true_betas = beta_all
 
     return covariates, covariate_names, true_betas
 
@@ -778,13 +766,3 @@ def validation_experiment(
     print(f"Validation results saved to {output_path}")
 
     return df, df_summary
-
-validation_experiment(
-    experiment_name="val_breslow_efron",
-    output_folder="benchmark_results",
-    n_patients_list=[1000],
-    covariate_combination=[(1, 0), (3, 0), (0, 1), (0, 3)],
-    n_simulations=100,
-    ties_list=["breslow", "efron"],
-    seed=123,
-)

@@ -10,6 +10,9 @@ if lib_path not in sys.path:
 from cox_functions import run_cox_experiment
 
 
+beta_candidates = [np.log(0.25), np.log(0.5), np.log(0.75), np.log(1.5), np.log(2.0), np.log(3.0), np.log(4.0)]
+
+
 ########## Figure 2
 
 experiment_name = "figure_2"
@@ -33,6 +36,7 @@ run_cox_experiment(
     n_patients_list=n_patients_list,
     covariate_combination=[(n_constant_covariates, n_time_dependent_covariates)],
     package_device_dtype_list=package_device_dtype_list,
+    beta_candidates=beta_candidates,
     n_bootstraps=n_bootstraps,
     n_iterations=n_iterations,
 )
@@ -61,6 +65,7 @@ run_cox_experiment(
     n_patients_list=n_patients_list,
     covariate_combination=[(n_constant_covariates, n_time_dependent_covariates)],
     package_device_dtype_list=package_device_dtype_list,
+    beta_candidates=beta_candidates,
     n_bootstraps=n_bootstraps,
     n_iterations=n_iterations,
 )
@@ -89,6 +94,7 @@ run_cox_experiment(
     n_patients_list=n_patients_list,
     covariate_combination=[(n_constant_covariates, n_time_dependent_covariates)],
     package_device_dtype_list=package_device_dtype_list,
+    beta_candidates=beta_candidates,
     n_bootstraps=n_bootstraps,
     n_iterations=n_iterations,
 )
