@@ -289,6 +289,106 @@ def run_benchmark_bootstraps(package_name,
     return hr_result, coef_list, computation_time
     
 
+def validation_wce_experiment(
+    experiment_name,
+    output_folder,
+    n_iteration,
+    n_patients,
+    max_time,
+    n_knots_list,
+    constraint_list,
+    cutoff_list,
+    HR_list,
+    scenario_list,
+    dtype,
+):
+    output_folder = Path(output_folder)
+    output_folder.mkdir(parents=True, exist_ok=True)
+    output_path = output_folder / f"{experiment_name}.csv"
+
+    rows = []
+
+    for (scenario, HR_target, constraint, cutoff, n_knots) in product(scenario_list, HR_list, constraint_list, cutoff_list, n_knots_list):
+        print(f"Running scenario {scenario} with target HR {HR_target}, constraint {constraint}, cutoff {cutoff} and n_knots {n_knots}")
+        for iteration in range(1, n_iteration + 1):
+            print(f"Iteration {iteration}/{n_iteration}...")
+
+            dataset = simulate_for_experiment(n_patients, max_time, HR_target, scenario)
+
+            HR_survivalgpu, coef_survivalgpu, time_survivalgpu = run_package_wce(
+                package_name = "survivalgpu",
+                start = "start",
+                stop = "stop",
+                patient_id = "patients",
+                event = "events",
+                dose = "dose",
+                constrained = constraint,
+                dataset = dataset,
+                n_knots_list = [n_knots],
+                cutoff = cutoff,
+                batch_size = 0,
+                n_bootstraps = 0,
+                device = "cuda",
+                dtype = dtype,
+            )
+
+            HR_WCE, coef_WCE, time_WCE = run_package_wce(
+                package_name = "WCE",
+                start = "start",
+                stop = "stop",
+                patient_id = "patients",
+                event = "events",
+                dose = "dose",
+                constrained = constraint,
+                dataset = dataset,
+                n_knots_list = [n_knots],
+                cutoff = cutoff,
+                dtype = np.float64,
+            )
+
+            HR_diff = HR_survivalgpu["HR"] - HR_WCE[0]
+
+            print(f"HR difference between survivalgpu and WCE: {HR_diff}")
+
+            constraint_str = constraint if constraint is not None else "None"
+
+            rows.append({
+                "experiment_name": experiment_name,
+                "scenario": scenario,
+                "HR_target": HR_target,
+                "iteration": iteration,
+                "constraint": constraint_str,
+                "cutoff": cutoff,
+                "n_knots": n_knots,
+                "HR_survivalgpu": HR_survivalgpu["HR"],
+                "coef_survivalgpu": coef_survivalgpu,
+                "time_survivalgpu": time_survivalgpu,
+                "HR_WCE": HR_WCE[0],
+                "coef_WCE": coef_WCE,
+                "absolute_difference": abs(HR_diff),
+                "relative_difference": abs(HR_diff) / abs(HR_WCE[0]),
+            })
+
+            pd.DataFrame(rows).to_csv(output_path, index=False)
+
+    df = pd.DataFrame(rows)
+
+    df_summary = (
+        df.groupby(["scenario", "HR_target", "constraint", "cutoff", "n_knots"], as_index=False)
+        .agg(
+            median_relative_difference=("relative_difference", "median"),
+            max_relative_difference=("relative_difference", "max"),
+            n_simulations=("iteration", "count"),
+        )
+    )
+    summary_path = output_folder / f"{experiment_name}_summary.csv"
+    df_summary.to_csv(summary_path, index=False)
+    print(f"Summary results saved to {summary_path}")
+    print(f"Validation results saved to {output_path}")
+
+    return df, df_summary
+
+
 def validation_wce(n_iteration,n_patients, max_time, constraint_list, cutoff_list, HR_list, scenario_list, dtype):
 
     rows = []
