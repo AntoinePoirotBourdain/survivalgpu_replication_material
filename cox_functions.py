@@ -380,9 +380,8 @@ def run_cox_experiment(
     experiment_name,
     output_folder,
     n_patients_list,
-    covariate_combination,
+    covariate_specs,
     package_device_dtype_list,
-    beta_candidates,
     n_bootstraps=0,
     batch_size=0,
     n_iterations=3,
@@ -393,6 +392,10 @@ def run_cox_experiment(
 
     Parameters
     ----------
+    covariate_specs : list of list of (kind, HR) tuples
+        Each spec describes the covariates of one dataset, e.g.
+        [("constant", 1.5), ("time_dep", 2.0)]. `kind` is either
+        "constant" or "time_dep".
     package_device_dtype_list : list of (package_name, device, dtype) tuples
         E.g. [("survivalgpu", "cuda", np.float32), ("survival", "cpu", np.float64)]
     """
@@ -406,13 +409,11 @@ def run_cox_experiment(
     print(f"Starting Cox experiment '{experiment_name}' | n_bootstraps={n_bootstraps} | n_iterations={n_iterations}")
     print(f"{'='*60}")
 
-    rng = np.random.default_rng(seed=seed)
-
     print("\nWarming up packages with 500 patients...")
     warmup_dataset = simulate_dataset(
         max_time=max_time,
         n_patients=500,
-        list_covariates=make_constant_covariates(1, rng.choice(beta_candidates, size=1)),
+        list_covariates=make_constant_covariates(1, [np.log(1.5)]),
         compress=True,
         seed=seed,
     )
@@ -432,12 +433,17 @@ def run_cox_experiment(
             dtype        = dtype,
         )
 
-    for dataset_idx, (n_patients, (n_constant, n_time_dep)) in enumerate(
-        itertools.product(n_patients_list, covariate_combination)
+    for dataset_idx, (n_patients, covariate_spec) in enumerate(
+        itertools.product(n_patients_list, covariate_specs)
     ):
+        constant_betas = [np.log(hr) for kind, hr in covariate_spec if kind == "constant"]
+        td_betas = [np.log(hr) for kind, hr in covariate_spec if kind == "time_dep"]
+        n_constant = len(constant_betas)
+        n_time_dep = len(td_betas)
+
         covariate_list = (
-            make_constant_covariates(n_constant, rng.choice(beta_candidates, size=n_constant))
-            + make_td_covariates(n_time_dep, rng.choice(beta_candidates, size=n_time_dep))
+            make_constant_covariates(n_constant, constant_betas)
+            + make_td_covariates(n_time_dep, td_betas)
         )
         covariate_names = (
             [f"constant_{j+1}" for j in range(n_constant)]

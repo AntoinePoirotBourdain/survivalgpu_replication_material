@@ -10,15 +10,17 @@ if lib_path not in sys.path:
 from cox_functions import run_cox_experiment
 
 
-beta_candidates = [np.log(0.25), np.log(0.5), np.log(0.75), np.log(1.5), np.log(2.0), np.log(3.0), np.log(4.0)]
+# Each spec describes the covariates of one dataset as a list of (kind, HR)
+# tuples, where kind is "constant" or "time_dep".
+covariate_specs = [
+    [("constant", 1.5)],
+]
 
 
 ########## Figure 2
 
 experiment_name = "figure_2"
 n_patients_list = [250, 500]
-n_constant_covariates = 1
-n_time_dependent_covariates = 0
 n_bootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
@@ -34,9 +36,8 @@ run_cox_experiment(
     experiment_name=experiment_name,
     output_folder=output_folder,
     n_patients_list=n_patients_list,
-    covariate_combination=[(n_constant_covariates, n_time_dependent_covariates)],
+    covariate_specs=covariate_specs,
     package_device_dtype_list=package_device_dtype_list,
-    beta_candidates=beta_candidates,
     n_bootstraps=n_bootstraps,
     n_iterations=n_iterations,
 )
@@ -46,8 +47,6 @@ run_cox_experiment(
 
 experiment_name = "figure_3"
 n_patients_list = [250, 500]
-n_constant_covariates = 1
-n_time_dependent_covariates = 0
 n_bootstraps = 1000
 output_folder = Path("results/")
 n_iterations = 3
@@ -63,9 +62,8 @@ run_cox_experiment(
     experiment_name=experiment_name,
     output_folder=output_folder,
     n_patients_list=n_patients_list,
-    covariate_combination=[(n_constant_covariates, n_time_dependent_covariates)],
+    covariate_specs=covariate_specs,
     package_device_dtype_list=package_device_dtype_list,
-    beta_candidates=beta_candidates,
     n_bootstraps=n_bootstraps,
     n_iterations=n_iterations,
 )
@@ -75,8 +73,6 @@ run_cox_experiment(
 
 experiment_name = "figure_4"
 n_patients_list = [250, 500]
-n_constant_covariates = 1
-n_time_dependent_covariates = 0
 n_bootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
@@ -92,9 +88,8 @@ run_cox_experiment(
     experiment_name=experiment_name,
     output_folder=output_folder,
     n_patients_list=n_patients_list,
-    covariate_combination=[(n_constant_covariates, n_time_dependent_covariates)],
+    covariate_specs=covariate_specs,
     package_device_dtype_list=package_device_dtype_list,
-    beta_candidates=beta_candidates,
     n_bootstraps=n_bootstraps,
     n_iterations=n_iterations,
 )
