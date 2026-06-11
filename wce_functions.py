@@ -311,11 +311,14 @@ def validation_wce_experiment(
 
     rng = np.random.default_rng(seed=seed)
 
-    for (scenario, constraint, cutoff, n_knots) in product(scenario_list, constraint_list, cutoff_list, n_knots_list):
-        print(f"Running scenario {scenario}, constraint {constraint}, cutoff {cutoff} and n_knots {n_knots}")
+    for (constraint, cutoff, n_knots) in product(constraint_list, cutoff_list, n_knots_list):
+        print(f"\n{'=' * 60}")
+        print(f"Running constraint={constraint}, cutoff={cutoff}, n_knots={n_knots}")
+        print(f"{'=' * 60}")
         for iteration in range(1, n_iteration + 1):
+            scenario = str(rng.choice(scenario_list))
             HR_target = float(rng.choice(hr_candidates))
-            print(f"Iteration {iteration}/{n_iteration} with target HR {HR_target}...")
+            print(f"\n--- Iteration {iteration}/{n_iteration} | scenario={scenario} | target HR={HR_target} ---")
 
             dataset = simulate_for_experiment(n_patients, max_time, HR_target, scenario)
 
@@ -352,7 +355,7 @@ def validation_wce_experiment(
 
             HR_diff = HR_survivalgpu["HR"] - HR_WCE[0]
 
-            print(f"HR difference between survivalgpu and WCE: {HR_diff}")
+            print(f"  HR difference between survivalgpu and WCE: {HR_diff}")
 
             constraint_str = constraint if constraint is not None else "None"
 
