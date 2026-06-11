@@ -23,7 +23,14 @@ n_knots_list      = [1, 2, 3]
 constraint_list   = [None, "right"]
 cutoff_list       = [180]
 hr_candidates     = [0.25, 0.5, 0.75, 1.5, 2.0, 3.0, 4.0]
-scenario_list     = ["exponential_scenario"]
+scenario_list     = [
+    "exponential_scenario",
+    "bi_linear_scenario",
+    "early_peak_scenario",
+    "inverted_u_scenario",
+    "constant_scenario",
+    "hat_scenario",
+]
 dtype             = np.float32
 seed              = 42
 
