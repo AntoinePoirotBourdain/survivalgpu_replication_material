@@ -381,7 +381,7 @@ def validation_wce_experiment(
     df = pd.DataFrame(rows)
 
     df_summary = (
-        df.groupby(["scenario", "constraint", "cutoff", "n_knots"], as_index=False)
+        df.groupby(["constraint", "cutoff", "n_knots"], as_index=False)
         .agg(
             median_relative_difference=("relative_difference", "median"),
             max_relative_difference=("relative_difference", "max"),
