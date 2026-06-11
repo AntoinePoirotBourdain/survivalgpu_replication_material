@@ -298,9 +298,10 @@ def validation_wce_experiment(
     n_knots_list,
     constraint_list,
     cutoff_list,
-    HR_list,
+    hr_candidates,
     scenario_list,
     dtype,
+    seed=None,
 ):
     output_folder = Path(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)
@@ -308,10 +309,13 @@ def validation_wce_experiment(
 
     rows = []
 
-    for (scenario, HR_target, constraint, cutoff, n_knots) in product(scenario_list, HR_list, constraint_list, cutoff_list, n_knots_list):
-        print(f"Running scenario {scenario} with target HR {HR_target}, constraint {constraint}, cutoff {cutoff} and n_knots {n_knots}")
+    rng = np.random.default_rng(seed=seed)
+
+    for (scenario, constraint, cutoff, n_knots) in product(scenario_list, constraint_list, cutoff_list, n_knots_list):
+        print(f"Running scenario {scenario}, constraint {constraint}, cutoff {cutoff} and n_knots {n_knots}")
         for iteration in range(1, n_iteration + 1):
-            print(f"Iteration {iteration}/{n_iteration}...")
+            HR_target = float(rng.choice(hr_candidates))
+            print(f"Iteration {iteration}/{n_iteration} with target HR {HR_target}...")
 
             dataset = simulate_for_experiment(n_patients, max_time, HR_target, scenario)
 
@@ -374,7 +378,7 @@ def validation_wce_experiment(
     df = pd.DataFrame(rows)
 
     df_summary = (
-        df.groupby(["scenario", "HR_target", "constraint", "cutoff", "n_knots"], as_index=False)
+        df.groupby(["scenario", "constraint", "cutoff", "n_knots"], as_index=False)
         .agg(
             median_relative_difference=("relative_difference", "median"),
             max_relative_difference=("relative_difference", "max"),

@@ -22,9 +22,10 @@ max_time          = 365
 n_knots_list      = [1, 2, 3]
 constraint_list   = [None, "right"]
 cutoff_list       = [180]
-HR_list           = [1.3]
+hr_candidates     = [0.25, 0.5, 0.75, 1.5, 2.0, 3.0, 4.0]
 scenario_list     = ["exponential_scenario"]
 dtype             = np.float32
+seed              = 42
 
 
 validation_wce_experiment(
@@ -36,7 +37,8 @@ validation_wce_experiment(
     n_knots_list=n_knots_list,
     constraint_list=constraint_list,
     cutoff_list=cutoff_list,
-    HR_list=HR_list,
+    hr_candidates=hr_candidates,
     scenario_list=scenario_list,
     dtype=dtype,
+    seed=seed,
 )
