@@ -754,6 +754,10 @@ def validation_experiment(
     output_folder.mkdir(parents=True, exist_ok=True)
     output_path = output_folder / f"{experiment_name}.csv"
 
+    print(f"\n{'=' * 60}")
+    print(f"Starting Cox validation experiment '{experiment_name}' | n_simulations={n_simulations} | ties_list={ties_list}")
+    print(f"{'=' * 60}")
+
     rows = []
 
     if isinstance(ties_list, str):
@@ -765,10 +769,14 @@ def validation_experiment(
     combo_iter = itertools.product(n_patients_list, covariate_combination)
     for combo_idx, (n_patients, (n_constant, n_time_dep)) in enumerate(combo_iter):
         total_cov = n_constant + n_time_dep
-        print(f"\nn_patients={n_patients} | n_constant={n_constant} | n_time_dep={n_time_dep}")
+        print(f"\n{'=' * 60}")
+        print(f"Running n_patients={n_patients}, n_constant={n_constant}, n_time_dep={n_time_dep}")
+        print(f"{'=' * 60}")
 
         for sim in range(n_simulations):
+            sim_start = time.time()
             random_betas = rng.choice(beta_candidates, size=total_cov, replace=True).tolist()
+            print(f"\n--- Simulation {sim + 1}/{n_simulations} | true_betas={[round(b, 4) for b in random_betas]} ---")
 
             cov_defs, cov_names, true_betas = build_covariates_with_betas(
                 n_constant=n_constant,
@@ -820,6 +828,8 @@ def validation_experiment(
                 mean_abs_diff = float(np.mean(abs_diffs)) if abs_diffs else np.nan
                 mean_rel_diff = float(np.nanmean(rel_diffs)) if rel_diffs else np.nan
 
+                print(f"  ties={ties:<8} | mean_abs_diff={mean_abs_diff:.3e} | mean_rel_diff={mean_rel_diff:.3e}")
+
                 for i, cov in enumerate(cov_names):
                     rows.append({
                         "experiment_name": experiment_name,
@@ -841,6 +851,8 @@ def validation_experiment(
 
 
                 pd.DataFrame(rows).to_csv(output_path, index=False)
+
+            print(f"  simulation time: {time.time() - sim_start:.4f} seconds")
 
     df = pd.DataFrame(rows)
 
