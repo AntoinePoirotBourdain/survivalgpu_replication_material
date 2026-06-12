@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 import numpy as np
 from pathlib import Path
 
@@ -20,7 +21,7 @@ covariate_specs = [
 ########## Figure 2
 
 experiment_name = "figure_2"
-n_patients_list = [250, 500]
+n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
 n_bootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
@@ -32,6 +33,7 @@ package_device_dtype_list = [
     ("lifelines", "cpu", np.float64),
 ]
 
+t_start = time.time()
 run_cox_experiment(
     experiment_name=experiment_name,
     output_folder=output_folder,
@@ -41,14 +43,15 @@ run_cox_experiment(
     n_bootstraps=n_bootstraps,
     n_iterations=n_iterations,
 )
+print(f"\nFigure 2 experiment took {time.time() - t_start:.2f} seconds")
 
 
 ########### Figure 3
 
 experiment_name = "figure_3"
-n_patients_list = [250, 500]
+n_patients_list = [500, 1000, 5000, 10000,100000]
 n_bootstraps = 1000
-batch_size = 2
+batch_size = 100
 output_folder = Path("results/")
 n_iterations = 3
 
@@ -59,6 +62,7 @@ package_device_dtype_list = [
     ("lifelines", "cpu", np.float64),
 ]
 
+t_start = time.time()
 run_cox_experiment(
     experiment_name=experiment_name,
     output_folder=output_folder,
@@ -69,12 +73,13 @@ run_cox_experiment(
     batch_size=batch_size,
     n_iterations=n_iterations,
 )
+print(f"\nFigure 3 experiment took {time.time() - t_start:.2f} seconds")
 
 
 ############ Figure 4
 
 experiment_name = "figure_4"
-n_patients_list = [250, 500]
+n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
 n_bootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
@@ -86,6 +91,7 @@ package_device_dtype_list = [
     ("torchsurv", "cpu", np.float32),
 ]
 
+t_start = time.time()
 run_cox_experiment(
     experiment_name=experiment_name,
     output_folder=output_folder,
@@ -95,3 +101,4 @@ run_cox_experiment(
     n_bootstraps=n_bootstraps,
     n_iterations=n_iterations,
 )
+print(f"\nFigure 4 experiment took {time.time() - t_start:.2f} seconds")

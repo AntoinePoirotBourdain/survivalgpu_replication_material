@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 import numpy as np
 from pathlib import Path
 
@@ -36,6 +37,7 @@ package_dtype_list = [
 ]
 
 
+t_start = time.time()
 run_wce_experiment(
     experiment_name=experiment_name,
     output_folder=output_folder,
@@ -52,5 +54,6 @@ run_wce_experiment(
     seed=seed,
     n_iterations=n_iterations,
 )
+print(f"\nFigure 5 experiment took {time.time() - t_start:.2f} seconds")
 
 
