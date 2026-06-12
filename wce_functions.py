@@ -22,7 +22,36 @@ from survivalgpu import WCESurvivalAnalysis, simulate_for_experiment
 
 def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset, n_knots, cutoff,
                      batch_size = 1, n_bootstraps = 1, device ="cpu", dtype = np.float32, covariates = None):
+    """Fits a Weighted Cumulative Exposure (WCE) model with `survivalgpu.WCESurvivalAnalysis`.
 
+    Args:
+        start (str): name of the "start" time column.
+        stop (str): name of the "stop"/event-time column.
+        patient_id (str): name of the patient identifier column.
+        event (str): name of the event indicator column (1 = event, 0 = censored).
+        doses (str): name of the exposure/dose column.
+        constrained ("right", "left" or None): shape constraint on the B-spline
+            risk function, see `WCESurvivalAnalysis`.
+        dataset (pandas.DataFrame): the input dataset.
+        n_knots (int): number of knots for the B-splines.
+        cutoff (int): size of the time window for the risk function.
+        batch_size (int, optional): batch size for the fit. Defaults to 1.
+        n_bootstraps (int, optional): number of bootstrap resamples. Defaults
+            to 1.
+        device (str, optional): "cpu" or "cuda". Defaults to "cpu".
+        dtype (numpy.dtype, optional): floating point precision. Defaults to
+            np.float32.
+        covariates (list[str] or None, optional): names of additional
+            (non-WCE) covariate columns. Defaults to None.
+
+    Returns:
+        tuple[numpy.ndarray, list[float], float, float]: a tuple of
+            (HR, coef_list, computation_time, BIC), where `HR` is the hazard
+            ratio curve returned by `model.HR` for an exposed-vs-unexposed
+            dose of 1 over the full cutoff window, `coef_list` are the
+            coefficients of the first bootstrap sample, `computation_time` is
+            the fit duration in seconds, and `BIC` is the model's BIC.
+    """
     patient_id = np.array(dataset[patient_id], dtype=np.int64)
     start = np.array(dataset[start], dtype=np.int64)
     stop = np.array(dataset[stop], dtype=np.int64)
@@ -71,11 +100,35 @@ def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset,
     return HR, coef_list, computation_time, BIC
 
 
-def wce_WCE(start, stop, patient_id, event, dose, 
+def wce_WCE(start, stop, patient_id, event, dose,
             constrained,dataset,n_knots, cutoff,covariates = None,
             ):
-    
-    
+    """Fits a Weighted Cumulative Exposure (WCE) model with R's `WCE` package, via rpy2.
+
+    Args:
+        start (str): name of the "start" time column.
+        stop (str): name of the "stop"/event-time column.
+        patient_id (str): name of the patient identifier column.
+        event (str): name of the event indicator column (1 = event, 0 = censored).
+        dose (str): name of the exposure/dose column.
+        constrained (str): shape constraint on the WCE risk function, passed
+            as-is to `WCE::WCE` (e.g. "right", "left" or "FALSE").
+        dataset (pandas.DataFrame): the input dataset.
+        n_knots (int): number of knots for the WCE model.
+        cutoff (int): size of the time window for the risk function.
+        covariates (list[str] or None, optional): if not None, the
+            coefficients of the additional covariates are extracted (excluding
+            the WCE term). Defaults to None.
+
+    Returns:
+        tuple[float, list[float], float, float]: a tuple of
+            (hr_result, coef_list, computation_time, BIC), where `hr_result`
+            is the hazard ratio between a constant dose of 1 and 0 over the
+            full cutoff window, `coef_list` are the coefficients of the
+            additional covariates (empty if `covariates` is None),
+            `computation_time` is the fit duration in seconds, and `BIC` is
+            the model's first information criterion.
+    """
     ro.r("library(WCE)")
 
     with localconverter(ro.default_converter + pandas2ri.converter):
@@ -188,8 +241,42 @@ def wce_WCE(start, stop, patient_id, event, dose,
 def run_package_wce(package_name,
         start, stop, patient_id, event, dose, constrained, dataset, n_knots_list, cutoff, dtype,
                      batch_size = 0, n_bootstraps = 0, device ="cpu", covariates = None ):
-    
-    time_total = 0 
+    """Fits a WCE model with the requested package, selecting the best number of knots by BIC.
+
+    For each value of `n_knots` in `n_knots_list`, fits a model with
+    `wce_survivalgpu` or `wce_WCE` and records its BIC. Returns the result
+    for the `n_knots` value with the lowest BIC.
+
+    Args:
+        package_name (str): either "survivalgpu" or "WCE".
+        start (str): name of the "start" time column.
+        stop (str): name of the "stop"/event-time column.
+        patient_id (str): name of the patient identifier column.
+        event (str): name of the event indicator column (1 = event, 0 = censored).
+        dose (str): name of the exposure/dose column.
+        constrained ("right", "left", None or str): shape constraint on the
+            WCE risk function (see `wce_survivalgpu` / `wce_WCE`).
+        dataset (pandas.DataFrame): the input dataset.
+        n_knots_list (list[int]): candidate numbers of knots to try.
+        cutoff (int): size of the time window for the risk function.
+        dtype (numpy.dtype): floating point precision, only used by
+            "survivalgpu".
+        batch_size (int, optional): batch size, only used by "survivalgpu".
+            Defaults to 0.
+        n_bootstraps (int, optional): number of bootstrap resamples, only used
+            by "survivalgpu". Defaults to 0.
+        device (str, optional): "cpu" or "cuda", only used by "survivalgpu".
+            Defaults to "cpu".
+        covariates (list[str] or None, optional): names of additional
+            covariate columns. Defaults to None.
+
+    Returns:
+        tuple[float or numpy.ndarray, list[float], float]: the
+            (hr_result, coef_list, computation_time) of the fit with the
+            lowest BIC among `n_knots_list`. Note `computation_time` is that
+            of the last fit performed, not necessarily the best one.
+    """
+    time_total = 0
 
     hr_result_list = []
     coef_list_list = []
@@ -267,7 +354,41 @@ def run_package_wce(package_name,
 def run_benchmark_bootstraps(package_name,
                             start, stop, patient_id, event, dose, constrained, dataset, n_knots_list, cutoff, dtype,
                             batch_size = 0, n_bootstraps = 0, device ="cpu", covariates = None):
+    """Runs a WCE fit via `run_package_wce`, optionally with bootstrapping, for benchmarking purposes.
 
+    If `n_bootstraps > 0` and the package is "survivalgpu" running on "cuda",
+    the bootstrap resamples are fit directly (a single timed call covering all
+    bootstraps). Otherwise, a single fit without bootstraps is timed and, if
+    `n_bootstraps > 0`, its computation time is extrapolated by multiplying by
+    `n_bootstraps + 1`.
+
+    Args:
+        package_name (str): either "survivalgpu" or "WCE".
+        start (str): name of the "start" time column.
+        stop (str): name of the "stop"/event-time column.
+        patient_id (str): name of the patient identifier column.
+        event (str): name of the event indicator column (1 = event, 0 = censored).
+        dose (str): name of the exposure/dose column.
+        constrained ("right", "left", None or str): shape constraint on the
+            WCE risk function.
+        dataset (pandas.DataFrame): the input dataset.
+        n_knots_list (list[int]): candidate numbers of knots, see `run_package_wce`.
+        cutoff (int): size of the time window for the risk function.
+        dtype (numpy.dtype): floating point precision, only used by
+            "survivalgpu".
+        batch_size (int, optional): batch size, only used by "survivalgpu".
+            Defaults to 0.
+        n_bootstraps (int, optional): number of bootstrap resamples. Defaults
+            to 0.
+        device (str, optional): "cpu" or "cuda". Defaults to "cpu".
+        covariates (list[str] or None, optional): names of additional
+            covariate columns. Defaults to None.
+
+    Returns:
+        tuple[float or numpy.ndarray, list[float], float]: the
+            (hr_result, coef_list, computation_time) of the selected fit, with
+            `computation_time` possibly extrapolated.
+    """
     if n_bootstraps > 0 and package_name == "survivalgpu" and device == "cuda":
         return run_package_wce(
             package_name, start, stop, patient_id, event, dose, constrained, dataset,
@@ -303,6 +424,44 @@ def validation_wce_experiment(
     dtype,
     seed=None,
 ):
+    """Compares `survivalgpu` and R's `WCE` hazard ratios on simulated datasets.
+
+    For each combination of `constraint_list` x `cutoff_list` x `n_knots_list`,
+    runs `n_iteration` simulations with a randomly drawn scenario (from
+    `scenario_list`) and target hazard ratio (from `hr_candidates`), fits a WCE
+    model with both "survivalgpu" (cuda, single `n_knots` value) and "WCE" (R,
+    same `n_knots` value), and records the absolute and relative differences
+    between the two packages' hazard ratios at dose 1 vs 0. Results are written
+    incrementally to `<output_folder>/<experiment_name>.csv`. A per-combination
+    summary of the relative differences is written to
+    `<output_folder>/<experiment_name>_summary.csv`.
+
+    Args:
+        experiment_name (str): name used for the output file names.
+        output_folder (str or Path): directory where results are written
+            (created if needed).
+        n_iteration (int): number of simulations per (constraint, cutoff,
+            n_knots) combination.
+        n_patients (int): number of patients to simulate per iteration.
+        max_time (int): maximum follow-up time for the simulated datasets.
+        n_knots_list (list[int]): numbers of knots to evaluate.
+        constraint_list (list): shape constraints to evaluate (e.g. "right",
+            "left", None).
+        cutoff_list (list[int]): cutoff (risk window) sizes to evaluate.
+        hr_candidates (list[float]): candidate target hazard ratios, one is
+            drawn at random for each iteration.
+        scenario_list (list[str]): candidate exposure-effect scenario names,
+            one is drawn at random for each iteration (see
+            `simulate_for_experiment`).
+        dtype (numpy.dtype): floating point precision used by "survivalgpu".
+        seed (int, optional): random seed for the scenario/HR draws. Defaults
+            to None (note: dataset simulation itself is not seeded).
+
+    Returns:
+        tuple[pandas.DataFrame, pandas.DataFrame]: the detailed per-iteration
+            results, and the per-combination summary (median and max relative
+            difference across iterations).
+    """
     output_folder = Path(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)
     output_path = output_folder / f"{experiment_name}.csv"
@@ -397,7 +556,35 @@ def validation_wce_experiment(
 
 
 def validation_wce(n_iteration,n_patients, max_time, constraint_list, cutoff_list, HR_list, scenario_list, dtype):
+    """Compares `survivalgpu` and R's `WCE` hazard ratios on simulated datasets, across all combinations.
 
+    For each combination of `scenario_list` x `HR_list` x `constraint_list` x
+    `cutoff_list`, runs `n_iteration` simulations and fits a WCE model with
+    both "survivalgpu" (cuda, knots in {1, 2, 3}) and "WCE" (R, same knots),
+    recording the absolute and relative differences between the two packages'
+    hazard ratios at dose 1 vs 0.
+
+    Unlike `validation_wce_experiment`, this function does not write results
+    to disk and iterates over the full cartesian product of all combinations
+    rather than drawing scenario/HR at random.
+
+    Args:
+        n_iteration (int): number of simulations per combination.
+        n_patients (int): number of patients to simulate per iteration.
+        max_time (int): maximum follow-up time for the simulated datasets.
+        constraint_list (list): shape constraints to evaluate (e.g. "right",
+            "left", None).
+        cutoff_list (list[int]): cutoff (risk window) sizes to evaluate.
+        HR_list (list[float]): target hazard ratios to evaluate.
+        scenario_list (list[str]): exposure-effect scenario names to evaluate
+            (see `simulate_for_experiment`).
+        dtype (numpy.dtype): floating point precision used by "survivalgpu".
+
+    Returns:
+        pandas.DataFrame: one row per (scenario, HR_target, constraint, cutoff,
+            iteration) with the hazard ratios, coefficients, computation times,
+            and absolute/relative differences between the two packages.
+    """
     rows = []
 
     for (scenario, HR_target, constraint, cutoff) in product(scenario_list, HR_list, constraint_list, cutoff_list):
@@ -483,12 +670,40 @@ def run_wce_experiment(
     n_iterations=3,
     seed=None,
 ):
-    """Run a WCE benchmark experiment.
+    """Runs a WCE timing benchmark experiment across patient counts and packages.
 
-    Parameters
-    ----------
-    package_dtype_list : list of (package_name, dtype, device) tuples
-        E.g. [("survivalgpu", np.float32, "cuda"), ("WCE", np.float64, "cpu")]
+    Warms up each package/dtype/device combination on a 500-patient dataset,
+    then for each `n_patients` in `n_patients_list`, simulates a dataset (see
+    `simulate_for_experiment`) and times `n_iterations` fits per package via
+    `run_benchmark_bootstraps`, averaging the computation time. Results are
+    written incrementally to `<output_folder>/<experiment_name>.csv`.
+
+    Args:
+        experiment_name (str): name used for the output file name.
+        output_folder (str or Path): directory where results are written
+            (created if needed).
+        n_patients_list (list[int]): numbers of patients to simulate and benchmark.
+        package_dtype_list (list[tuple[str, numpy.dtype, str]]): list of
+            (package_name, dtype, device) tuples, e.g.
+            [("survivalgpu", np.float32, "cuda"), ("WCE", np.float64, "cpu")].
+        scenario (str): exposure-effect scenario name (see `simulate_for_experiment`).
+        HR_target (float): target hazard ratio for the simulated "dose" covariate.
+        max_time (int): maximum follow-up time for the simulated datasets.
+        cutoff (int): size of the time window for the risk function.
+        n_knots_list (list[int]): candidate numbers of knots, see `run_package_wce`.
+        constrained ("right", "left" or None): shape constraint on the WCE
+            risk function.
+        n_bootstraps (int, optional): number of bootstrap resamples. Defaults to 0.
+        batch_size (int, optional): batch size, only used by "survivalgpu".
+            Defaults to 0.
+        n_iterations (int, optional): number of timed fits per package per
+            `n_patients`, averaged. Defaults to 3.
+        seed (int, optional): random seed for dataset simulation. Defaults to None.
+
+    Returns:
+        pandas.DataFrame: one row per (n_patients, package) with the
+            experiment parameters and the mean computation time over
+            `n_iterations`.
     """
     output_folder = Path(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)
