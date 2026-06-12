@@ -706,6 +706,7 @@ def validation_experiment(
     output_folder,
     n_patients_list,
     covariate_combination,
+    beta_candidates,
     n_simulations=1,
     ties_list=("breslow", "efron"),
     max_time=365,
@@ -730,6 +731,9 @@ def validation_experiment(
         n_patients_list (list[int]): numbers of patients to simulate.
         covariate_combination (list[tuple[int, int]]): list of
             (n_constant, n_time_dep) covariate-count combinations.
+        beta_candidates (list[float]): candidate true regression coefficients
+            (log-hazard-ratio scale) drawn at random for each covariate of
+            each simulation.
         n_simulations (int, optional): number of simulations per combination.
             Defaults to 1.
         ties_list (str or tuple[str], optional): ties handling method(s) to
@@ -764,8 +768,7 @@ def validation_experiment(
         print(f"\nn_patients={n_patients} | n_constant={n_constant} | n_time_dep={n_time_dep}")
 
         for sim in range(n_simulations):
-            _BETA_CANDIDATES = [np.log(0.25), np.log(0.5), np.log(0.75), np.log(1.5), np.log(2.0), np.log(3.0), np.log(4.0)]
-            random_betas = rng.choice(_BETA_CANDIDATES, size=total_cov, replace=True).tolist()
+            random_betas = rng.choice(beta_candidates, size=total_cov, replace=True).tolist()
 
             cov_defs, cov_names, true_betas = build_covariates_with_betas(
                 n_constant=n_constant,
