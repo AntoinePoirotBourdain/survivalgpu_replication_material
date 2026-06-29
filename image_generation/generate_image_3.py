@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 ############ Figure: Benchmark of Cox with bootstraps
-data_path = Path("../results")
+data_path = Path("results")
 
 n_bootstraps = 1000
 
@@ -105,5 +105,5 @@ ax[1].grid(True, which="major", ls="-",  lw=0.5, alpha=0.4)
 ax[1].grid(True, which="minor", ls="--", lw=0.3, alpha=0.3)
 
 fig.tight_layout()
-fig.savefig("../figures/figure_3.pdf", bbox_inches="tight")
+fig.savefig("figures/figure_3.pdf", bbox_inches="tight")
 plt.close(fig)
