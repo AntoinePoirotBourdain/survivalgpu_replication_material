@@ -8,7 +8,6 @@ from rpy2.robjects.conversion import localconverter
 import time
 from pathlib import Path
 
-import torch as torch
 from survivalgpu import WCESurvivalAnalysis, simulate_for_experiment
 
 
@@ -164,72 +163,6 @@ def wce_WCE(start, stop, patient_id, event, dose,
     return hr_result, coef_list, computation_time, BIC
 
 
-# def wce_wceGPU(start, stop, patient_id, event, dose,
-#                constrained, dataset, ties, n_knots, cutoff,
-#                batch_size=0, n_bootstraps=0, double_precision=True,
-#                aic=False, confint=0.95, verbosity=0, covariates=None):
-
-#     ro.r(f'devtools::load_all("../survivalGPU/R")')
-
-#     with localconverter(ro.default_converter + pandas2ri.converter):
-#         ro.globalenv["R_dataset"] = ro.conversion.py2rpy(dataset)
-
-#     # Convert constrained: Python string "right"/"left"/False → R value
-#     if isinstance(constrained, bool):
-#         r_constrained = "TRUE" if constrained else "FALSE"
-#     else:
-#         r_constrained = f'"{constrained}"'
-
-#     # Convert covariates: None → NULL, single string → c("col"), list → c("col1", "col2")
-#     if covariates is None:
-#         r_covariates = "NULL"
-#     elif isinstance(covariates, str):
-#         r_covariates = f'c("{covariates}")'
-#     else:
-#         quoted = ", ".join(f'"{c}"' for c in covariates)
-#         r_covariates = f"c({quoted})"
-
-#     r_aic = "TRUE" if aic else "FALSE"
-#     r_double = "TRUE" if double_precision else "FALSE"
-
-#     time_start = time.time()
-
-#     ro.r(f"""
-#         model_wcegpu <- wceGPU(
-#             data             = R_dataset,
-#             nknots           = {n_knots},
-#             cutoff           = {cutoff},
-#             id               = "{patient_id}",
-#             event            = "{event}",
-#             start            = "{start}",
-#             stop             = "{stop}",
-#             expos            = "{dose}",
-#             covariates       = {r_covariates},
-#             constrained      = {r_constrained},
-#             aic              = {r_aic},
-#             confint          = {confint},
-#             nbootstraps      = {n_bootstraps},
-#             batchsize        = {batch_size},
-#             verbosity        = {verbosity},
-#             double_precision = {r_double}
-#         )
-#     """)
-
-#     time_stop = time.time()
-#     computation_time = time_stop - time_start
-
-#     coef_list = list(ro.r("as.vector(model_wcegpu$beta.hat)"))
-
-#     hr_result = ro.r(f"""
-#         exposed   <- rep(1, {cutoff})
-#         unexposed <- rep(0, {cutoff})
-#         WCE::HR.WCE(model_wcegpu, exposed, unexposed)
-#     """)
-
-#     return hr_result, coef_list, computation_time
-
-
-# TODO add the BIC
 def run_package_wce(package_name,
         start, stop, patient_id, event, dose, constrained, dataset, n_knots_list, cutoff, dtype,
                      batch_size = 0, n_bootstraps = 0, device ="cpu", covariates = None ):
@@ -547,105 +480,6 @@ def validation_wce_experiment(
     return df, df_summary
 
 
-def validation_wce(n_iteration,n_patients, max_time, constraint_list, cutoff_list, HR_list, scenario_list, dtype):
-    """Compares `survivalgpu` and R's `WCE` hazard ratios on simulated datasets, across all combinations.
-
-    For each combination of `scenario_list` x `HR_list` x `constraint_list` x
-    `cutoff_list`, runs `n_iteration` simulations and fits a WCE model with
-    both "survivalgpu" (cuda, knots in {1, 2, 3}) and "WCE" (R, same knots),
-    recording the absolute and relative differences between the two packages'
-    hazard ratios at dose 1 vs 0.
-
-    Unlike `validation_wce_experiment`, this function does not write results
-    to disk and iterates over the full cartesian product of all combinations
-    rather than drawing scenario/HR at random.
-
-    Args:
-        n_iteration (int): number of simulations per combination.
-        n_patients (int): number of patients to simulate per iteration.
-        max_time (int): maximum follow-up time for the simulated datasets.
-        constraint_list (list): shape constraints to evaluate (e.g. "right",
-            "left", None).
-        cutoff_list (list[int]): cutoff (risk window) sizes to evaluate.
-        HR_list (list[float]): target hazard ratios to evaluate.
-        scenario_list (list[str]): exposure-effect scenario names to evaluate
-            (see `simulate_for_experiment`).
-        dtype (numpy.dtype): floating point precision used by "survivalgpu".
-
-    Returns:
-        pandas.DataFrame: one row per (scenario, HR_target, constraint, cutoff,
-            iteration) with the hazard ratios, coefficients, computation times,
-            and absolute/relative differences between the two packages.
-    """
-    rows = []
-
-    for (scenario, HR_target, constraint, cutoff) in product(scenario_list, HR_list, constraint_list, cutoff_list):
-        print(f"Running scenario {scenario} with target HR {HR_target}, constraint {constraint} and cutoff {cutoff}")
-        for iteration in range(1, n_iteration + 1):
-            print(f"Iteration {iteration}/{n_iteration}...")
-
-            dataset = simulate_for_experiment(n_patients, max_time,HR_target, scenario)
-            HR_survivalgpu, coef_survivalgpu, time_survivalgpu = run_package_wce(
-                package_name = "survivalgpu",
-                start = "start",
-                stop = "stop",
-                patient_id = "patients",
-                event = "events",
-                dose = "dose",
-                constrained = constraint,
-                dataset = dataset,
-                n_knots_list = [1,2,3],
-                cutoff = cutoff,
-                batch_size = 0,
-                n_bootstraps = 0,
-                device = "cuda",
-                dtype=dtype,
-                )
-
-            HR_WCE, coef_WCE, time_WCE = run_package_wce(
-                package_name = "WCE",
-                start = "start",
-                stop = "stop",
-                patient_id = "patients",
-                event = "events",
-                dose = "dose",
-                constrained = constraint,
-                dataset = dataset,
-                n_knots_list = [1,2,3],
-                cutoff = cutoff,
-                dtype = np.float64
-                # covariates = "covariate",
-            )
-
-            HR_diff  = HR_survivalgpu["HR"] - HR_WCE[0]
-
-            print(f"HR difference between survivalgpu and WCE: {HR_diff}")
-
-            constraint_str = constraint if constraint is not None else "None"
-
-            rows.append({
-                "scenario": scenario,
-                "HR_target": HR_target,
-                "iteration": iteration,
-                "constraint": constraint_str,
-                "cutoff": cutoff,
-                "HR_survivalgpu": HR_survivalgpu["HR"],
-                "coef_survivalgpu": coef_survivalgpu,
-                "time_survivalgpu": time_survivalgpu,
-                "HR_WCE": HR_WCE[0],
-                "coef_WCE": coef_WCE,
-                "absolute_difference": abs(HR_diff),
-                "relative_difference": abs(HR_diff) / abs(HR_WCE[0])
-            })
-
-
-    return pd.DataFrame(rows)
-
-
-
-
-
-
 def run_wce_experiment(
     experiment_name,
     output_folder,
@@ -797,28 +631,5 @@ def run_wce_experiment(
             pd.DataFrame(df_results).to_csv(output_path, index=False)
 
     return pd.DataFrame(df_results)
-
-
-# def run_wce_benchmark_experiment():
-    
-
-
-
-
-        
-
-
-        
-        
-
-
-        
-        
-
-    
-
-    
-        
-
 
     

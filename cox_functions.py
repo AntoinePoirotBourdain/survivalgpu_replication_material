@@ -1,11 +1,3 @@
-# import time
-# import pandas as pd
-# import torch
-# import torch.nn as nn
-# import numpy as np
-# from rpy2.robjects.packages import importr
-# from torchsurv.loss.cox import neg_partial_log_likelihood
-
 import itertools
 
 import pandas as pd
@@ -14,10 +6,9 @@ import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
 import time
-import os
 from pathlib import Path
 
-from simulation_functions import quick_simulated_dataset, simulate_dataset_in_batches
+from simulation_functions import simulate_dataset_in_batches
 
 
 ## pacakges import for benchmarks
@@ -27,7 +18,7 @@ from torchsurv.loss.cox import neg_partial_log_likelihood
 import xgboost as xgb
 
 import torch as torch
-from survivalgpu import CoxPHSurvivalAnalysis, WCESurvivalAnalysis, simulate_dataset, ConstantCovariate, TimeDependentCovariate
+from survivalgpu import CoxPHSurvivalAnalysis, simulate_dataset, ConstantCovariate, TimeDependentCovariate
 
 
 CUDA_PACKAGES = ["survivalgpu", "torchsurv","xgboost"]
@@ -66,27 +57,6 @@ def make_td_covariates(n, coef_list):
         TimeDependentCovariate(f"time_dep_{i+1}", values=[0.5, 1.0, 1.5, 2.0], coef=coef_list[i])
         for i in range(n)
     ]
-
-
-def open_dataset(n_patients, n_constant_covariates, n_time_dependent_covariates, compressed = True):
-
-    if n_constant_covariates > 0 and n_time_dependent_covariates > 0:
-        filename = f"{n_patients}_{n_constant_covariates}c_{n_time_dependent_covariates}td.csv"
-    elif n_constant_covariates == 0 and n_time_dependent_covariates > 0:
-        filename = f"{n_patients}_{n_time_dependent_covariates}td.csv"
-    elif n_constant_covariates > 0 and n_time_dependent_covariates == 0:
-        filename = f"{n_patients}_{n_constant_covariates}c.csv"
-    else:
-        raise ValueError("At least one of n_constant_covariates and n_time_dependent_covariates must be greater than 0")
-
-
-
-    if compressed:
-        path = os.path.join("../analysis_survivalgpu/JSS/benchmark_datasets_compressed", filename)
-    else:
-        path = os.path.join("../analysis_survivalgpu/JSS/benchmark_datasets", filename)
-
-    return pd.read_csv(path)
 
 
 def cox_r_survival(start, stop, event, covariates, dataset, ties):
@@ -315,10 +285,6 @@ def cox_torchsurv(start, stop, event, covariates, dataset, ties, device=None):
     coef_list = model.weight.data.squeeze().tolist()
     return coef_list, elapsed
 
-
-def cox_statsmodels(start, stop, event, covariates, dataset, ties):
-    """Placeholder for a Cox PH fit with `statsmodels`. Not implemented yet."""
-    print( "cox_statsmodels is not implemented yet")
 
 def cox_xgboost(start, stop, event, covariates, dataset, device="cpu"):
     """Fits a Cox PH model with `xgboost`'s `survival:cox` objective (linear booster).
@@ -564,14 +530,7 @@ def run_cox_experiment(
         n_constant = len(constant_betas)
         n_time_dep = len(td_betas)
 
-        covariate_list = (
-            make_constant_covariates(n_constant, constant_betas)
-            + make_td_covariates(n_time_dep, td_betas)
-        )
-        covariate_names = (
-            [f"constant_{j+1}" for j in range(n_constant)]
-            + [f"time_dep_{j+1}" for j in range(n_time_dep)]
-        )
+        covariate_list, covariate_names = make_covariates(n_constant, n_time_dep, constant_betas + td_betas)
         dataset_seed = None if seed is None else seed + dataset_idx
 
         t_sim_start = time.time()
@@ -639,65 +598,42 @@ def run_cox_experiment(
     return pd.DataFrame(df_results)
 
 
-def build_covariates_with_betas(
-    n_constant,
-    n_time_dep,
-    first_covariate_beta_list,
-    other_covariates_beta_list,
-):
-    """Builds constant and time-dependent covariates with given coefficients.
+def make_covariates(n_constant, n_time_dep, betas):
+    """Builds constant and time-dependent covariates from a flat list of betas.
 
-    The first covariate's coefficient is taken from
-    `first_covariate_beta_list[0]`; the remaining `n_constant + n_time_dep - 1`
-    coefficients are taken from the start of `other_covariates_beta_list`.
-    Constant covariates are assigned the first `n_constant` coefficients, and
-    time-dependent covariates the remaining ones.
+    Shared by `run_cox_experiment` and `validation_experiment` so both build
+    covariates the same way. The first `n_constant` betas are assigned to
+    constant covariates, the remaining `n_time_dep` to time-dependent
+    covariates, matching the order `make_constant_covariates` and
+    `make_td_covariates` are concatenated in.
 
     Args:
         n_constant (int): the number of constant covariates to create.
         n_time_dep (int): the number of time-dependent covariates to create.
-        first_covariate_beta_list (list[float]): a one-element list containing
-            the coefficient for the first covariate.
-        other_covariates_beta_list (list[float]): coefficients for the
-            remaining covariates, must contain at least
-            `n_constant + n_time_dep - 1` values.
+        betas (list[float]): coefficients (log hazard ratios), in
+            [constant betas..., time-dependent betas...] order. Must contain
+            exactly `n_constant + n_time_dep` values.
 
     Returns:
-        tuple[list, list[str], list[float]]: a tuple of
-            (covariates, covariate_names, true_betas), where `covariates` is a
-            list of `ConstantCovariate`/`TimeDependentCovariate` instances,
-            `covariate_names` are their names, and `true_betas` are the
-            coefficients used, in the same order as `covariates`.
+        tuple[list, list[str]]: (covariates, covariate_names), where
+            `covariates` is a list of `ConstantCovariate`/`TimeDependentCovariate`
+            instances and `covariate_names` are their names, in the same order.
 
     Raises:
-        ValueError: if `n_constant + n_time_dep < 1`, if
-            `first_covariate_beta_list` is empty, or if
-            `other_covariates_beta_list` does not contain enough values.
+        ValueError: if `n_constant + n_time_dep < 1`, or if `betas` does not
+            contain exactly `n_constant + n_time_dep` values.
     """
     total_cov = n_constant + n_time_dep
     if total_cov < 1:
         raise ValueError("At least one covariate is required.")
 
-    if len(first_covariate_beta_list) < 1:
-        raise ValueError("first_covariate_beta_list must contain at least 1 value.")
+    if len(betas) != total_cov:
+        raise ValueError(f"betas must contain exactly {total_cov} values (got {len(betas)}).")
 
-    expected_other_betas = total_cov - 1
-    if len(other_covariates_beta_list) < expected_other_betas:
-        raise ValueError(
-            f"other_covariates_beta_list must contain at least {expected_other_betas} values "
-            f"(got {len(other_covariates_beta_list)})."
-        )
-
-    beta_all = [first_covariate_beta_list[0]] + list(other_covariates_beta_list[:expected_other_betas])
-
-    constant_betas = beta_all[:n_constant]
-    td_betas = beta_all[n_constant:]
-
-    covariates = make_constant_covariates(n_constant, constant_betas) + make_td_covariates(n_time_dep, td_betas)
+    covariates = make_constant_covariates(n_constant, betas[:n_constant]) + make_td_covariates(n_time_dep, betas[n_constant:])
     covariate_names = [c.name for c in covariates]
-    true_betas = beta_all
 
-    return covariates, covariate_names, true_betas
+    return covariates, covariate_names
 
 
 def validation_experiment(
@@ -777,12 +713,8 @@ def validation_experiment(
             random_betas = rng.choice(beta_candidates, size=total_cov, replace=True).tolist()
             print(f"\n--- Simulation {sim + 1}/{n_simulations} | true_betas={[round(b, 4) for b in random_betas]} ---")
 
-            cov_defs, cov_names, true_betas = build_covariates_with_betas(
-                n_constant=n_constant,
-                n_time_dep=n_time_dep,
-                first_covariate_beta_list=[random_betas[0]],
-                other_covariates_beta_list=random_betas[1:],
-            )
+            true_betas = random_betas
+            cov_defs, cov_names = make_covariates(n_constant, n_time_dep, true_betas)
 
             dataset_seed = int(rng.integers(0, 2**31))
 

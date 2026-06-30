@@ -19,9 +19,6 @@ xgboost_time      = xgboost["computation_time"].values
 torchsurv_time    = torchsurv["computation_time"].values
 
 # --- Style ---
-# --- Style ---
-# --- Style ---
-# --- Style ---
 survivalgpu_style = {"color": "#0072B2", "marker": "D", "ls": "-",  "linewidth": 2}
 xgboost_style     = {"color": "#E69F00", "marker": "o", "ls": ":",  "linewidth": 1.5}
 torchsurv_style   = {"color": "#009E73", "marker": "v", "ls": ":",  "linewidth": 1.5}
