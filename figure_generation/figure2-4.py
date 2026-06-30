@@ -1,12 +1,6 @@
-import sys
-import os
 import time
 import numpy as np
 from pathlib import Path
-
-lib_path = os.path.abspath("/home/dev/survivalGPU/python")
-if lib_path not in sys.path:
-    sys.path.insert(0, lib_path)
 
 from cox_functions import run_cox_experiment
 

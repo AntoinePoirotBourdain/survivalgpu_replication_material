@@ -1,20 +1,12 @@
 from itertools import product
 
-import pandas as pd 
+import pandas as pd
 import numpy as np
-from zmq import device
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
 import time
-import sys
-import os
 from pathlib import Path
-from itertools import product
-
-lib_path = os.path.abspath("/home/dev/survivalGPU/python")
-if lib_path not in sys.path:
-    sys.path.insert(0, lib_path)
 
 import torch as torch
 from survivalgpu import WCESurvivalAnalysis, simulate_for_experiment
@@ -177,7 +169,7 @@ def wce_WCE(start, stop, patient_id, event, dose,
 #                batch_size=0, n_bootstraps=0, double_precision=True,
 #                aic=False, confint=0.95, verbosity=0, covariates=None):
 
-#     ro.r(f'devtools::load_all("/home/dev/survivalGPU/R")')
+#     ro.r(f'devtools::load_all("../survivalGPU/R")')
 
 #     with localconverter(ro.default_converter + pandas2ri.converter):
 #         ro.globalenv["R_dataset"] = ro.conversion.py2rpy(dataset)

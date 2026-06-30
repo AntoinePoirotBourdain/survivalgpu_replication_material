@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "survivalgpu-replication-material"
+version = "0.1.0"
+description = "Replication material (figures, tables, benchmarks) for the survivalGPU paper"
+readme = "README.md"
+requires-python = ">= 3.10"
+dependencies = [
+  "numpy",
+  "pandas",
+  "matplotlib",
+  "torch",
+  "lifelines",
+  "torchsurv",
+  "xgboost",
+  "rpy2",
+]
+
+# The survivalgpu package itself is NOT listed here: it lives in the sibling
+# survivalGPU repository and is installed separately, see README.md
+# (pip install -e ../survivalGPU[all]).
+
+[tool.setuptools]
+py-modules = ["cox_functions", "wce_functions", "simulation_functions"]

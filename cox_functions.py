@@ -7,15 +7,13 @@
 # from torchsurv.loss.cox import neg_partial_log_likelihood
 
 import itertools
-from unittest import result
 
-import pandas as pd 
+import pandas as pd
 import numpy as np
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
 import time
-import sys
 import os
 from pathlib import Path
 
@@ -27,15 +25,6 @@ from lifelines import CoxPHFitter, CoxTimeVaryingFitter
 import torch.nn as nn
 from torchsurv.loss.cox import neg_partial_log_likelihood
 import xgboost as xgb
-
-
-
-
-
-
-lib_path = os.path.abspath("/home/dev/survivalGPU/python")
-if lib_path not in sys.path:
-    sys.path.insert(0, lib_path)
 
 import torch as torch
 from survivalgpu import CoxPHSurvivalAnalysis, WCESurvivalAnalysis, simulate_dataset, ConstantCovariate, TimeDependentCovariate
@@ -93,9 +82,9 @@ def open_dataset(n_patients, n_constant_covariates, n_time_dependent_covariates,
 
 
     if compressed:
-        path = os.path.join("/home/dev/analysis_survivalgpu/JSS/benchmark_datasets_compressed", filename)
+        path = os.path.join("../analysis_survivalgpu/JSS/benchmark_datasets_compressed", filename)
     else:
-        path = os.path.join("/home/dev/analysis_survivalgpu/JSS/benchmark_datasets", filename)
+        path = os.path.join("../analysis_survivalgpu/JSS/benchmark_datasets", filename)
 
     return pd.read_csv(path)
 

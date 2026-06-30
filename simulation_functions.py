@@ -1,11 +1,6 @@
 
-import os
-import sys
 import numpy as np
 import pandas as pd
-lib_path = os.path.abspath("/home/dev/survivalGPU/python")
-if lib_path not in sys.path:
-    sys.path.insert(0, lib_path)
 
 from survivalgpu import simulate_dataset, ConstantCovariate, TimeDependentCovariate
 

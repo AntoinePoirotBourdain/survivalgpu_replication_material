@@ -1,11 +1,5 @@
-import os
-import sys
 from pathlib import Path
 import matplotlib.pyplot as plt
-
-lib_path = os.path.abspath("/home/dev/survivalGPU/python")
-if lib_path not in sys.path:
-    sys.path.insert(0, lib_path)
 
 from survivalgpu.simulations import get_scenario
 

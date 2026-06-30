@@ -1,22 +1,14 @@
-import sys
-import os
 import time
 import numpy as np
 from pathlib import Path
 
-lib_path = os.path.abspath("/home/dev/survivalGPU/python")
-if lib_path not in sys.path:
-    sys.path.insert(0, lib_path)
-
 from wce_functions import run_wce_experiment
 
 
-######### Benchmark WCE without bootstraps #########
+######### Benchmark WCE with 500 bootstraps #########
 
-print("Running WCE benchmark without bootstraps...")
-
-experiment_name   = "figure_5"
-output_folder     = Path("benchmark_results")
+experiment_name   = "figure_6"
+output_folder     = Path("results/")
 n_patients_list   = [500, 1000, 5000, 10000, 50000, 100000]
 scenario          = "exponential_scenario"
 HR_target         = 1.3
@@ -24,8 +16,8 @@ max_time          = 365
 cutoff            = 180
 n_knots_list      = [3]
 constrained       = None
-n_bootstraps      = 0
-batch_size        = 0
+n_bootstraps      = 500
+batch_size        = 2
 seed              = 42
 n_iterations      = 1
 
@@ -54,6 +46,6 @@ run_wce_experiment(
     seed=seed,
     n_iterations=n_iterations,
 )
-print(f"\nFigure 5 experiment took {time.time() - t_start:.2f} seconds")
+print(f"\nFigure 6 experiment took {time.time() - t_start:.2f} seconds")
 
 
