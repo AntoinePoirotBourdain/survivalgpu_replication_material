@@ -7,9 +7,6 @@ from cox_functions import run_cox_experiment
 
 # Each spec describes the covariates of one dataset as a list of (kind, HR)
 # tuples, where kind is "constant" or "time_dep".
-covariate_specs = [
-    [("constant", 1.5)],
-]
 
 
 ########## Figure 2
@@ -19,6 +16,10 @@ n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
 n_bootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
+covariate_specs = [
+    [("time_dep", 1.5)],
+]
+
 
 package_device_dtype_list = [
     ("survivalgpu", "cuda", np.float32),
@@ -48,6 +49,10 @@ n_bootstraps = 1000
 batch_size = 100
 output_folder = Path("results/")
 n_iterations = 3
+covariate_specs = [
+    [("time_dep", 1.5)],
+]
+
 
 package_device_dtype_list = [
     ("survivalgpu", "cuda", np.float32),
@@ -77,6 +82,10 @@ n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
 n_bootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
+covariate_specs = [
+    [("constant", 1.5)],
+]
+
 
 package_device_dtype_list = [
     ("survivalgpu", "cuda", np.float32),
