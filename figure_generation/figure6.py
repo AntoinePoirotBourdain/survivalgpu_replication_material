@@ -5,21 +5,25 @@ from pathlib import Path
 from wce_functions import run_wce_experiment
 
 
-######### Benchmark WCE with 500 bootstraps #########
+
+
+
+######### Benchmark WCE with 1000 bootstraps #########
 
 experiment_name   = "figure_6"
 output_folder     = Path("results/")
 n_patients_list   = [500, 1000, 5000, 10000, 50000, 100000]
 scenario          = "exponential_scenario"
-HR_target         = 1.3
+HR_target         = 1.5
 max_time          = 365
 cutoff            = 180
 n_knots_list      = [3]
 constrained       = None
-n_bootstraps      = 500
+n_bootstraps      = 1000
 batch_size        = 2
 seed              = 42
-n_iterations      = 1
+n_iterations      = 3
+
 
 # List of (package, dtype, device) couples to benchmark
 package_dtype_list = [
