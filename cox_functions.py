@@ -17,7 +17,7 @@ import time
 import os
 from pathlib import Path
 
-from simulation_functions import quick_simulated_dataset
+from simulation_functions import quick_simulated_dataset, simulate_dataset_in_batches
 
 
 ## pacakges import for benchmarks
@@ -575,13 +575,23 @@ def run_cox_experiment(
         dataset_seed = None if seed is None else seed + dataset_idx
 
         t_sim_start = time.time()
-        dataset = simulate_dataset(
-            max_time=max_time,
-            n_patients=n_patients,
-            list_covariates=covariate_list,
-            compress=True,
-            seed=dataset_seed,
-        )
+        if n_patients >= 100000:
+            dataset = simulate_dataset_in_batches(
+                max_time=max_time,
+                n_patients=n_patients,
+                list_covariates=covariate_list,
+                batch_size=50000,
+                compress=True,
+                seed=dataset_seed,
+            )
+        else:
+            dataset = simulate_dataset(
+                max_time=max_time,
+                n_patients=n_patients,
+                list_covariates=covariate_list,
+                compress=True,
+                seed=dataset_seed,
+            )
         t_sim = time.time() - t_sim_start
 
         print(f"\n--- n_patients={n_patients} | n_constant={n_constant} | n_time_dep={n_time_dep} ---")
@@ -776,13 +786,23 @@ def validation_experiment(
 
             dataset_seed = int(rng.integers(0, 2**31))
 
-            dataset = simulate_dataset(
-                max_time=max_time,
-                n_patients=n_patients,
-                list_covariates=cov_defs,
-                compress=True,
-                seed=dataset_seed,
-            )
+            if n_patients >= 100000:
+                dataset = simulate_dataset_in_batches(
+                    max_time=max_time,
+                    n_patients=n_patients,
+                    list_covariates=cov_defs,
+                    batch_size=50000,
+                    compress=True,
+                    seed=dataset_seed,
+                )
+            else:
+                dataset = simulate_dataset(
+                    max_time=max_time,
+                    n_patients=n_patients,
+                    list_covariates=cov_defs,
+                    compress=True,
+                    seed=dataset_seed,
+                )
 
             start_col = "start" if n_time_dep > 0 else None
 
