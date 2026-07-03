@@ -2,6 +2,7 @@ from itertools import product
 
 import pandas as pd
 import numpy as np
+import torch
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
@@ -441,7 +442,7 @@ def validation_wce_experiment(
                 cutoff = cutoff,
                 batchsize = 0,
                 nbootstraps = 0,
-                device = "cuda",
+                device = "cuda" if torch.cuda.is_available() else "cpu",
                 dtype = dtype,
             )
 
