@@ -12,7 +12,8 @@ from survivalgpu import WCESurvivalAnalysis, simulate_for_experiment
 
 
 def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset, nknots, cutoff,
-                     batchsize = 1, nbootstraps = 1, device ="cpu", dtype = np.float32, covariates = None):
+                     batchsize = 1, nbootstraps = 1, device ="cpu", dtype = np.float32, covariates = None,
+                     criterion = "bic"):
     """Fits a Weighted Cumulative Exposure (WCE) model with `survivalgpu.WCESurvivalAnalysis`.
 
     Args:
@@ -34,14 +35,17 @@ def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset,
             np.float32.
         covariates (list[str] or None, optional): names of additional
             (non-WCE) covariate columns. Defaults to None.
+        criterion ("aic" or "bic", optional): information criterion reported
+            in the returned tuple, see `WCESurvivalAnalysis`. Defaults to "bic".
 
     Returns:
         tuple[numpy.ndarray, list[float], float, float]: a tuple of
-            (HR, coef_list, computation_time, BIC), where `HR` is the hazard
-            ratio curve returned by `model.HR` for an exposed-vs-unexposed
-            dose of 1 over the full cutoff window, `coef_list` are the
-            coefficients of the first bootstrap sample, `computation_time` is
-            the fit duration in seconds, and `BIC` is the model's BIC.
+            (HR, coef_list, computation_time, info_criterion), where `HR` is
+            the hazard ratio curve returned by `model.HR` for an
+            exposed-vs-unexposed dose of 1 over the full cutoff window,
+            `coef_list` are the coefficients of the first bootstrap sample,
+            `computation_time` is the fit duration in seconds, and
+            `info_criterion` is the model's AIC or BIC (see `criterion`).
     """
     patient_id = np.array(dataset[patient_id], dtype=np.int64)
     start = np.array(dataset[start], dtype=np.int64)
@@ -60,6 +64,7 @@ def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset,
         constrained = constrained,
         nbootstraps = nbootstraps,
         batchsize = batchsize,
+        criterion = criterion,
     )
 
     time_start = time.time()
@@ -73,7 +78,7 @@ def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset,
         covariates = covariates,
     )
 
-    
+
 
     time_stop = time.time()
     computation_time = time_stop - time_start
@@ -85,14 +90,15 @@ def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset,
 
     HR = model.HR(vecnum, vecdenom, 0.95)
 
-    BIC = model.BIC_
+    info_criterion = model.info_criterion_
 
 
-    return HR, coef_list, computation_time, BIC
+    return HR, coef_list, computation_time, info_criterion
 
 
 def wce_WCE(start, stop, patient_id, event, dose,
             constrained,dataset,nknots, cutoff,covariates = None,
+            criterion = "bic",
             ):
     """Fits a Weighted Cumulative Exposure (WCE) model with R's `WCE` package, via rpy2.
 
@@ -110,22 +116,26 @@ def wce_WCE(start, stop, patient_id, event, dose,
         covariates (list[str] or None, optional): if not None, the
             coefficients of the additional covariates are extracted (excluding
             the WCE term). Defaults to None.
+        criterion ("aic" or "bic", optional): information criterion reported
+            in the returned tuple; forwarded to `WCE::WCE`'s `aic` argument
+            (`aic = (criterion == "aic")`). Defaults to "bic".
 
     Returns:
         tuple[float, list[float], float, float]: a tuple of
-            (hr_result, coef_list, computation_time, BIC), where `hr_result`
-            is the hazard ratio between a constant dose of 1 and 0 over the
-            full cutoff window, `coef_list` are the coefficients of the
-            additional covariates (empty if `covariates` is None),
-            `computation_time` is the fit duration in seconds, and `BIC` is
-            the model's first information criterion.
+            (hr_result, coef_list, computation_time, info_criterion), where
+            `hr_result` is the hazard ratio between a constant dose of 1 and 0
+            over the full cutoff window, `coef_list` are the coefficients of
+            the additional covariates (empty if `covariates` is None),
+            `computation_time` is the fit duration in seconds, and
+            `info_criterion` is the model's first AIC or BIC (see `criterion`).
     """
     ro.r("library(WCE)")
 
     with localconverter(ro.default_converter + pandas2ri.converter):
         ro.globalenv["R_dataset"] = ro.conversion.py2rpy(dataset)
 
-    
+    r_aic = "TRUE" if criterion == "aic" else "FALSE"
+
     time_start = time.time()
 
     ro.r(f"""
@@ -138,7 +148,8 @@ def wce_WCE(start, stop, patient_id, event, dose,
             start       = "{start}",
             stop        = "{stop}",
             expos       = "{dose}",
-            constrained = "{constrained}"
+            constrained = "{constrained}",
+            aic         = {r_aic}
         )
     """)
 
@@ -150,27 +161,28 @@ def wce_WCE(start, stop, patient_id, event, dose,
     else:
         coef_list = []
 
-  
+
     hr_result = ro.r(f"""
         exposed   <- rep(1, {cutoff})
         unexposed <- rep(0, {cutoff})
         WCE::HR.WCE(model_wce, exposed, unexposed)
     """)
 
-    BIC = ro.r("model_wce$info.criterion[[1]]")[0]
+    info_criterion = ro.r("model_wce$info.criterion[[1]]")[0]
 
 
-    return hr_result, coef_list, computation_time, BIC
+    return hr_result, coef_list, computation_time, info_criterion
 
 
 def run_package_wce(package_name,
         start, stop, patient_id, event, dose, constrained, dataset, nknots_list, cutoff, dtype,
-                     batchsize = 0, nbootstraps = 0, device ="cpu", covariates = None ):
-    """Fits a WCE model with the requested package, selecting the best number of knots by BIC.
+                     batchsize = 0, nbootstraps = 0, device ="cpu", covariates = None, criterion = "bic"):
+    """Fits a WCE model with the requested package, selecting the best number of knots by information criterion.
 
     For each value of `nknots` in `nknots_list`, fits a model with
-    `wce_survivalgpu` or `wce_WCE` and records its BIC. Returns the result
-    for the `nknots` value with the lowest BIC.
+    `wce_survivalgpu` or `wce_WCE` and records its information criterion (AIC
+    or BIC, see `criterion`). Returns the result for the `nknots` value with
+    the lowest value.
 
     Args:
         package_name (str): either "survivalgpu" or "WCE".
@@ -194,25 +206,29 @@ def run_package_wce(package_name,
             Defaults to "cpu".
         covariates (list[str] or None, optional): names of additional
             covariate columns. Defaults to None.
+        criterion ("aic" or "bic", optional): information criterion used to
+            select the best `nknots` value, forwarded to `wce_survivalgpu` /
+            `wce_WCE`. Defaults to "bic".
 
     Returns:
         tuple[float or numpy.ndarray, list[float], float]: the
             (hr_result, coef_list, computation_time) of the fit with the
-            lowest BIC among `nknots_list`. Note `computation_time` is that
-            of the last fit performed, not necessarily the best one.
+            lowest information criterion among `nknots_list`. Note
+            `computation_time` is that of the last fit performed, not
+            necessarily the best one.
     """
     time_total = 0
 
     hr_result_list = []
     coef_list_list = []
-    bic_list = []
+    info_criterion_list = []
 
-    
+
     if package_name == "survivalgpu":
 
 
         for knots in nknots_list:
-            hr_result, coef_list, computation_time, BIC = wce_survivalgpu(
+            hr_result, coef_list, computation_time, info_criterion = wce_survivalgpu(
                 start=start,
                 stop=stop,
                 patient_id=patient_id,
@@ -226,21 +242,21 @@ def run_package_wce(package_name,
                 nbootstraps = nbootstraps,
                 device = device,
                 dtype = dtype,
-                covariates = covariates
+                covariates = covariates,
+                criterion = criterion,
             )
             time_total += computation_time
 
             hr_result_list.append(hr_result)
             coef_list_list.append(coef_list)
-            bic_list.append(BIC)
+            info_criterion_list.append(info_criterion)
 
-        
 
 
 
     elif package_name == "WCE":
 
-        time_total = 0 
+        time_total = 0
 
         if constrained is None:
             constrained = "FALSE"
@@ -248,7 +264,7 @@ def run_package_wce(package_name,
 
 
         for knots in nknots_list:
-            hr_result, coef_list, computation_time, BIC = wce_WCE(
+            hr_result, coef_list, computation_time, info_criterion = wce_WCE(
                 start=start,
                 stop=stop,
                 patient_id=patient_id,
@@ -258,19 +274,20 @@ def run_package_wce(package_name,
                 dataset=dataset,
                 nknots=knots,
                 cutoff=cutoff,
-                covariates=covariates
+                covariates=covariates,
+                criterion=criterion,
             )
             time_total += computation_time
 
             hr_result_list.append(hr_result)
             coef_list_list.append(coef_list)
-            bic_list.append(BIC)
+            info_criterion_list.append(info_criterion)
 
 
 
-    best_bic_index = bic_list.index(min(bic_list))
-    hr_result = hr_result_list[best_bic_index]
-    coef_list = coef_list_list[best_bic_index]
+    best_index = info_criterion_list.index(min(info_criterion_list))
+    hr_result = hr_result_list[best_index]
+    coef_list = coef_list_list[best_index]
 
 
     return hr_result, coef_list, computation_time
