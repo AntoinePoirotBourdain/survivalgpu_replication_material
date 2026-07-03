@@ -14,3 +14,6 @@ python image_generation/generate_image_5.py
 
 # Generate figure 6
 python image_generation/generate_image_6.py
+
+# Generate figure 8
+python image_generation/generate_image_8.py
