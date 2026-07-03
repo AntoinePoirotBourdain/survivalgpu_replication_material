@@ -135,6 +135,10 @@ def wce_WCE(start, stop, patient_id, event, dose,
         ro.globalenv["R_dataset"] = ro.conversion.py2rpy(dataset)
 
     r_aic = "TRUE" if criterion == "aic" else "FALSE"
+    if covariates is not None:
+        r_covariates = "c(" + ", ".join(f'"{c}"' for c in covariates) + ")"
+    else:
+        r_covariates = "NULL"
 
     time_start = time.time()
 
@@ -148,6 +152,7 @@ def wce_WCE(start, stop, patient_id, event, dose,
             start       = "{start}",
             stop        = "{stop}",
             expos       = "{dose}",
+            covariates  = {r_covariates},
             constrained = "{constrained}",
             aic         = {r_aic}
         )
@@ -157,7 +162,7 @@ def wce_WCE(start, stop, patient_id, event, dose,
     computation_time = time_stop - time_start
 
     if covariates is not None:
-        coef_list = ro.r("coef(model_wce)")[1:].tolist()  # Exclude the first coefficient which corresponds to the WCE term
+        coef_list = list(ro.r("coef(model_wce)$covariates"))  # coef() returns a named list; $covariates excludes the WCE term
     else:
         coef_list = []
 
