@@ -13,7 +13,7 @@ from cox_functions import run_cox_experiment
 
 experiment_name = "figure_2"
 n_patients_list = [500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
-n_bootstraps = 0
+nbootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [
@@ -45,8 +45,8 @@ print(f"\nFigure 2 experiment took {time.time() - t_start:.2f} seconds")
 
 experiment_name = "figure_3"
 n_patients_list = [500, 1000, 5000, 10000,100000]
-n_bootstraps = 1000
-batch_size = 25
+nbootstraps = 1000
+batchsize = 25
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [
@@ -81,7 +81,7 @@ experiment_name = "figure_4"
 # n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
 n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
 
-n_bootstraps = 0
+nbootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [
