@@ -98,7 +98,7 @@ def cox_r_survival(start, stop, event, covariates, dataset, ties):
 
 
 
-def cox_survivalgpu(start, stop, event, covariates, dataset, ties, batch_size = 0, n_bootstraps = 0, device ="cpu", dtype = np.float32):
+def cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize = 0, nbootstraps = 0, device ="cpu", dtype = np.float32):
     """Fits a Cox PH model with `survivalgpu.CoxPHSurvivalAnalysis`.
 
     Args:
@@ -110,9 +110,9 @@ def cox_survivalgpu(start, stop, event, covariates, dataset, ties, batch_size = 
         covariates (list[str]): names of the covariate columns.
         dataset (pandas.DataFrame): the input dataset.
         ties (str): the ties handling method, e.g. "breslow" or "efron".
-        batch_size (int, optional): batch size for the fit. Defaults to 0
+        batchsize (int, optional): batch size for the fit. Defaults to 0
             (no batching).
-        n_bootstraps (int, optional): number of bootstrap resamples. Defaults
+        nbootstraps (int, optional): number of bootstrap resamples. Defaults
             to 0 (no bootstrapping).
         device (str, optional): "cpu" or "cuda". Defaults to "cpu".
         dtype (numpy.dtype, optional): floating point precision used for the
@@ -134,8 +134,8 @@ def cox_survivalgpu(start, stop, event, covariates, dataset, ties, batch_size = 
         ties=ties,
         dtype=dtype,
         device=device,
-        n_bootstraps=n_bootstraps,
-        batch_size=batch_size,
+        nbootstraps=nbootstraps,
+        batchsize=batchsize,
     )
 
     time_start = time.time()
@@ -349,7 +349,7 @@ def cox_xgboost(start, stop, event, covariates, dataset, device="cpu"):
 def run_package_cox(
         package_name,
         start, stop, event, covariates, dataset, ties,
-        batch_size = 0, n_bootstraps = 0, device ="cpu", dtype = np.float32
+        batchsize = 0, nbootstraps = 0, device ="cpu", dtype = np.float32
 ):
     """Dispatches a Cox PH fit to the requested package's implementation.
 
@@ -364,9 +364,9 @@ def run_package_cox(
         dataset (pandas.DataFrame): the input dataset.
         ties (str): the ties handling method, e.g. "breslow" or "efron"
             ("torchsurv" always uses "efron").
-        batch_size (int, optional): batch size, only used by "survivalgpu".
+        batchsize (int, optional): batch size, only used by "survivalgpu".
             Defaults to 0.
-        n_bootstraps (int, optional): number of bootstrap resamples, only used
+        nbootstraps (int, optional): number of bootstrap resamples, only used
             by "survivalgpu". Defaults to 0.
         device (str, optional): "cpu" or "cuda". Defaults to "cpu".
         dtype (numpy.dtype, optional): floating point precision, only used by
@@ -390,7 +390,7 @@ def run_package_cox(
         return cox_r_survival(start, stop, event, covariates, dataset, ties)
     
     if package_name == "survivalgpu":
-        return cox_survivalgpu(start, stop, event, covariates, dataset, ties, batch_size, n_bootstraps, device, dtype)
+        return cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize, nbootstraps, device, dtype)
 
     if package_name == "lifelines":
         return cox_lifelines(start, stop, event, covariates, dataset, ties)
@@ -407,15 +407,15 @@ def run_package_cox(
 def run_benchmark_bootstraps(
         package_name,
         start, stop, event, covariates, dataset, ties,
-        batch_size = 0, n_bootstraps = 0, device ="cpu", dtype = np.float32
+        batchsize = 0, nbootstraps = 0, device ="cpu", dtype = np.float32
 ):
     """Runs a Cox PH fit, optionally with bootstrapping, for benchmarking purposes.
 
-    If `n_bootstraps > 0` and the package is "survivalgpu" running on "cuda",
+    If `nbootstraps > 0` and the package is "survivalgpu" running on "cuda",
     the bootstrap resamples are fit directly (a single timed call covering all
     bootstraps). Otherwise, a single fit without bootstraps is timed and, if
-    `n_bootstraps > 0`, its computation time is extrapolated by multiplying by
-    `n_bootstraps + 1`.
+    `nbootstraps > 0`, its computation time is extrapolated by multiplying by
+    `nbootstraps + 1`.
 
     Args:
         package_name (str): the package to use, see `run_package_cox`.
@@ -426,9 +426,9 @@ def run_benchmark_bootstraps(
         covariates (list[str]): names of the covariate columns.
         dataset (pandas.DataFrame): the input dataset.
         ties (str): the ties handling method, e.g. "breslow" or "efron".
-        batch_size (int, optional): batch size, only used by "survivalgpu".
+        batchsize (int, optional): batch size, only used by "survivalgpu".
             Defaults to 0.
-        n_bootstraps (int, optional): number of bootstrap resamples. Defaults
+        nbootstraps (int, optional): number of bootstrap resamples. Defaults
             to 0.
         device (str, optional): "cpu" or "cuda". Defaults to "cpu".
         dtype (numpy.dtype, optional): floating point precision, only used by
@@ -439,8 +439,8 @@ def run_benchmark_bootstraps(
             `covariates`) and the (possibly extrapolated) computation time in
             seconds.
     """
-    if n_bootstraps > 0 and package_name == "survivalgpu" and device == "cuda":
-        return cox_survivalgpu(start, stop, event, covariates, dataset, ties, batch_size, n_bootstraps, device, dtype)
+    if nbootstraps > 0 and package_name == "survivalgpu" and device == "cuda":
+        return cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize, nbootstraps, device, dtype)
 
     # For all other cases (survivalgpu CPU, other packages, or no bootstraps):
     # run a single iteration without bootstraps and extrapolate if needed.
@@ -452,14 +452,14 @@ def run_benchmark_bootstraps(
         covariates=covariates,
         dataset=dataset,
         ties=ties,
-        batch_size=0,
-        n_bootstraps=0,
+        batchsize=0,
+        nbootstraps=0,
         device=device,
         dtype=dtype,
     )
 
-    if n_bootstraps > 0:
-        computation_time = computation_time * (n_bootstraps + 1)
+    if nbootstraps > 0:
+        computation_time = computation_time * (nbootstraps + 1)
 
     return coef_list, computation_time
 
@@ -471,8 +471,8 @@ def run_cox_experiment(
     n_patients_list,
     covariate_specs,
     package_device_dtype_list,
-    n_bootstraps=0,
-    batch_size=0,
+    nbootstraps=0,
+    batchsize=0,
     n_iterations=3,
     max_time=365,
     seed=None,
@@ -495,7 +495,7 @@ def run_cox_experiment(
     df_results = []
 
     print(f"\n{'='*60}")
-    print(f"Starting Cox experiment '{experiment_name}' | n_bootstraps={n_bootstraps} | n_iterations={n_iterations}")
+    print(f"Starting Cox experiment '{experiment_name}' | nbootstraps={nbootstraps} | n_iterations={n_iterations}")
     print(f"{'='*60}")
 
     print("\nWarming up packages with 500 patients...")
@@ -516,8 +516,8 @@ def run_cox_experiment(
             covariates   = ["constant_1"],
             dataset      = warmup_dataset,
             ties         = "efron",
-            batch_size   = 0,
-            n_bootstraps = 0,
+            batchsize   = 0,
+            nbootstraps = 0,
             device       = device,
             dtype        = dtype,
         )
@@ -539,7 +539,7 @@ def run_cox_experiment(
                 max_time=max_time,
                 n_patients=n_patients,
                 list_covariates=covariate_list,
-                batch_size=50000,
+                batchsize=50000,
                 compress=True,
                 seed=dataset_seed,
             )
@@ -571,8 +571,8 @@ def run_cox_experiment(
                     covariates   = covariate_names,
                     dataset      = dataset,
                     ties         = "efron",
-                    batch_size   = batch_size,
-                    n_bootstraps = n_bootstraps,
+                    batchsize   = batchsize,
+                    nbootstraps = nbootstraps,
                     device       = device,
                     dtype        = dtype,
                 )
@@ -723,7 +723,7 @@ def validation_experiment(
                     max_time=max_time,
                     n_patients=n_patients,
                     list_covariates=cov_defs,
-                    batch_size=50000,
+                    batchsize=50000,
                     compress=True,
                     seed=dataset_seed,
                 )

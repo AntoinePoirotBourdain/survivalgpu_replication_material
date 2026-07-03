@@ -13,7 +13,7 @@ from cox_functions import run_cox_experiment
 
 experiment_name = "figure_2"
 n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
-n_bootstraps = 0
+nbootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [
@@ -35,7 +35,7 @@ run_cox_experiment(
     n_patients_list=n_patients_list,
     covariate_specs=covariate_specs,
     package_device_dtype_list=package_device_dtype_list,
-    n_bootstraps=n_bootstraps,
+    nbootstraps=nbootstraps,
     n_iterations=n_iterations,
 )
 print(f"\nFigure 2 experiment took {time.time() - t_start:.2f} seconds")
@@ -45,8 +45,8 @@ print(f"\nFigure 2 experiment took {time.time() - t_start:.2f} seconds")
 
 experiment_name = "figure_3"
 n_patients_list = [500, 1000, 5000, 10000,100000]
-n_bootstraps = 1000
-batch_size = 100
+nbootstraps = 1000
+batchsize = 100
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [
@@ -68,8 +68,8 @@ run_cox_experiment(
     n_patients_list=n_patients_list,
     covariate_specs=covariate_specs,
     package_device_dtype_list=package_device_dtype_list,
-    n_bootstraps=n_bootstraps,
-    batch_size=batch_size,
+    nbootstraps=nbootstraps,
+    batchsize=batchsize,
     n_iterations=n_iterations,
 )
 print(f"\nFigure 3 experiment took {time.time() - t_start:.2f} seconds")
@@ -79,7 +79,7 @@ print(f"\nFigure 3 experiment took {time.time() - t_start:.2f} seconds")
 
 experiment_name = "figure_4"
 n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
-n_bootstraps = 0
+nbootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [
@@ -101,7 +101,7 @@ run_cox_experiment(
     n_patients_list=n_patients_list,
     covariate_specs=covariate_specs,
     package_device_dtype_list=package_device_dtype_list,
-    n_bootstraps=n_bootstraps,
+    nbootstraps=nbootstraps,
     n_iterations=n_iterations,
 )
 print(f"\nFigure 4 experiment took {time.time() - t_start:.2f} seconds")

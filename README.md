@@ -5,15 +5,17 @@ paper: Cox and WCE (Weighted Cumulative Exposure) model fits compared
 against reference R/Python implementations, with and without GPU
 acceleration.
 
-## Setup
+## Installation
 
-The code requires Python >= 3.10, and the `survivalgpu` package, which lives
-in the sibling `survivalGPU` repository. Clone it next to this one, so that
-`survivalGPU/` and `survivalgpu_replication_material/` are sibling
-directories.
+The `survivalgpu` package lives in the sibling `survivalGPU` repository.
+Clone it next to this one, so that `survivalGPU/` and
+`survivalgpu_replication_material/` are sibling directories.
 
-From this directory (`survivalgpu_replication_material`), create and
-activate a virtual environment:
+### Python
+
+The code requires Python >= 3.10. From this directory
+(`survivalgpu_replication_material`), create and activate a virtual
+environment:
 
 ```bash
 python3 -m venv .venv
@@ -27,12 +29,37 @@ pip install -e ../survivalGPU[all]
 pip install -e .
 ```
 
-The WCE validation/benchmark code calls R via `rpy2`. Install R, then the
-`survival` and `WCE` packages from an R session:
+`pykeops`, one of survivalGPU's core dependencies, just-in-time compiles
+CUDA/C++ kernels, so a working C++ compiler is required; a CUDA-capable GPU
+is optional (the package falls back to CPU otherwise).
+
+### R
+
+The R-only `illustration.R` script (see below) and the WCE
+validation/benchmark code (called via `rpy2`) need R, plus the `WCE`,
+`remotes`, and `reticulate` packages:
 
 ```r
-install.packages(c("survival", "WCE"))
+install.packages(c("WCE", "remotes", "reticulate"))
 ```
+
+The survivalGPU R package is a thin wrapper around the Python package
+installed above, calling into it via `reticulate`. Install it from the
+sibling clone:
+
+```r
+remotes::install_local("../survivalGPU/R")
+```
+
+By default, `reticulate` picks its own Python interpreter, which may not
+have `survivalgpu` installed. Point it at the virtual environment created
+in the Python setup step by setting `RETICULATE_PYTHON` before launching R:
+
+```bash
+export RETICULATE_PYTHON=/path/to/survivalgpu_replication_material/.venv/bin/python
+```
+
+> **Warning**: survivalGPU is not currently available on Windows.
 
 ## Reproducing the paper's figures and tables
 
@@ -66,6 +93,35 @@ python image_generation/generate_image_8.py     # figure 8 (WCE weight scenarios
 
 PDFs are written to `figures/`.
 
+### 3. Worked example ("Illustration" section, figure 7)
+
+`illustration.R` reproduces the `drugdata` worked example from the paper's
+Illustration section: a BIC-based model selection grid over `nknots` and
+`constrained`, a bootstrap refit (`B = 100`) of the selected model, the
+weight-function plot, and the hazard-ratio calculation. Unlike the rest of
+this repository, it drives survivalGPU's R interface directly rather than
+its Python API. It needs the R setup and `RETICULATE_PYTHON` environment
+variable described in "Installation" above.
+
+With `RETICULATE_PYTHON` set and the working directory set to this
+repository (`survivalgpu_replication_material`):
+
+```bash
+Rscript illustration.R
+```
+
+or, from an interactive R session:
+
+```r
+setwd("path/to/survivalgpu_replication_material")
+source("illustration.R")
+```
+
+The script attaches `WCE` and `survivalGPU`, loads `WCE::drugdata`, and runs
+the workflow above. It prints the BIC comparison table, the selected
+model's `summary()` output, and the hazard-ratio estimate to the console,
+and writes the weight-function plot to `figures/figure_7.pdf`.
+
 ## Repository layout
 
 - `cox_functions.py`, `wce_functions.py`, `simulation_functions.py` — shared
@@ -76,6 +132,8 @@ PDFs are written to `figures/`.
 - `image_generation/` — scripts that turn experiment results (`results/`,
   `benchmark_results/`) into the paper's PDF figures (`figures/`).
 - `scripts/` — shell wrappers around the experiment scripts.
+- `illustration.R` — standalone R script reproducing the paper's
+  "Illustration" section (figure 7) on the `WCE::drugdata` data set.
 - `results/`, `benchmark_results/` — experiment output (CSV).
 - `figures/` — generated PDF figures.
 - `logs/` — logs from background experiment runs.

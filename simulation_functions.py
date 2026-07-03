@@ -6,8 +6,8 @@ import pandas as pd
 from survivalgpu import simulate_dataset
 
 
-def simulate_dataset_in_batches(max_time, n_patients, list_covariates, batch_size=50000, compress=True, seed=None):
-    """Simulates a dataset of `n_patients` patients in batches of `batch_size`.
+def simulate_dataset_in_batches(max_time, n_patients, list_covariates, batchsize=50000, compress=True, seed=None):
+    """Simulates a dataset of `n_patients` patients in batches of `batchsize`.
 
     Simulating very large numbers of patients in a single `simulate_dataset`
     call can be slow. This splits the work into successive batches, offsetting
@@ -22,7 +22,7 @@ def simulate_dataset_in_batches(max_time, n_patients, list_covariates, batch_siz
         max_time (int): the maximum follow-up time, passed to `simulate_dataset`.
         n_patients (int): the total number of patients to simulate.
         list_covariates (list): the covariates to simulate, passed to `simulate_dataset`.
-        batch_size (int, optional): number of patients simulated per batch. Defaults to 50000.
+        batchsize (int, optional): number of patients simulated per batch. Defaults to 50000.
         compress (bool, optional): passed to `simulate_dataset`. Defaults to True.
         seed (int, optional): random seed for the first batch; subsequent batches
             use `seed + 1000 * i`, to keep batch seeds well clear of any other
@@ -32,14 +32,14 @@ def simulate_dataset_in_batches(max_time, n_patients, list_covariates, batch_siz
         pandas.DataFrame: the concatenated dataset, with `n_patients` distinct,
             contiguous patient ids.
     """
-    n_full_batches, remainder = divmod(n_patients, batch_size)
-    batch_sizes = [batch_size] * n_full_batches
+    n_full_batches, remainder = divmod(n_patients, batchsize)
+    batch_sizes = [batchsize] * n_full_batches
     if remainder > 0:
         batch_sizes.append(remainder)
     n_batches = len(batch_sizes)
 
     if n_batches > 1:
-        print(f"Generating {n_patients} patients in {n_batches} batches of up to {batch_size}...")
+        print(f"Generating {n_patients} patients in {n_batches} batches of up to {batchsize}...")
 
     t_total_start = time.time()
     batches = []

@@ -11,8 +11,8 @@ from pathlib import Path
 from survivalgpu import WCESurvivalAnalysis, simulate_for_experiment
 
 
-def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset, n_knots, cutoff,
-                     batch_size = 1, n_bootstraps = 1, device ="cpu", dtype = np.float32, covariates = None):
+def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset, nknots, cutoff,
+                     batchsize = 1, nbootstraps = 1, device ="cpu", dtype = np.float32, covariates = None):
     """Fits a Weighted Cumulative Exposure (WCE) model with `survivalgpu.WCESurvivalAnalysis`.
 
     Args:
@@ -24,10 +24,10 @@ def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset,
         constrained ("right", "left" or None): shape constraint on the B-spline
             risk function, see `WCESurvivalAnalysis`.
         dataset (pandas.DataFrame): the input dataset.
-        n_knots (int): number of knots for the B-splines.
+        nknots (int): number of knots for the B-splines.
         cutoff (int): size of the time window for the risk function.
-        batch_size (int, optional): batch size for the fit. Defaults to 1.
-        n_bootstraps (int, optional): number of bootstrap resamples. Defaults
+        batchsize (int, optional): batch size for the fit. Defaults to 1.
+        nbootstraps (int, optional): number of bootstrap resamples. Defaults
             to 1.
         device (str, optional): "cpu" or "cuda". Defaults to "cpu".
         dtype (numpy.dtype, optional): floating point precision. Defaults to
@@ -54,12 +54,12 @@ def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset,
 
     model = WCESurvivalAnalysis(
         cutoff=cutoff,
-        n_knots=n_knots,
+        nknots=nknots,
         dtype = dtype,
         device = device,
         constrained = constrained,
-        n_bootstraps = n_bootstraps,
-        batch_size = batch_size,
+        nbootstraps = nbootstraps,
+        batchsize = batchsize,
     )
 
     time_start = time.time()
@@ -92,7 +92,7 @@ def wce_survivalgpu(start, stop, patient_id, event, doses, constrained, dataset,
 
 
 def wce_WCE(start, stop, patient_id, event, dose,
-            constrained,dataset,n_knots, cutoff,covariates = None,
+            constrained,dataset,nknots, cutoff,covariates = None,
             ):
     """Fits a Weighted Cumulative Exposure (WCE) model with R's `WCE` package, via rpy2.
 
@@ -105,7 +105,7 @@ def wce_WCE(start, stop, patient_id, event, dose,
         constrained (str): shape constraint on the WCE risk function, passed
             as-is to `WCE::WCE` (e.g. "right", "left" or "FALSE").
         dataset (pandas.DataFrame): the input dataset.
-        n_knots (int): number of knots for the WCE model.
+        nknots (int): number of knots for the WCE model.
         cutoff (int): size of the time window for the risk function.
         covariates (list[str] or None, optional): if not None, the
             coefficients of the additional covariates are extracted (excluding
@@ -131,7 +131,7 @@ def wce_WCE(start, stop, patient_id, event, dose,
     ro.r(f"""
         model_wce <- WCE(
             data        = R_dataset,
-            nknots      = {n_knots},
+            nknots      = {nknots},
             cutoff      = {cutoff},
             id          = "{patient_id}",
             event       = "{event}",
@@ -164,13 +164,13 @@ def wce_WCE(start, stop, patient_id, event, dose,
 
 
 def run_package_wce(package_name,
-        start, stop, patient_id, event, dose, constrained, dataset, n_knots_list, cutoff, dtype,
-                     batch_size = 0, n_bootstraps = 0, device ="cpu", covariates = None ):
+        start, stop, patient_id, event, dose, constrained, dataset, nknots_list, cutoff, dtype,
+                     batchsize = 0, nbootstraps = 0, device ="cpu", covariates = None ):
     """Fits a WCE model with the requested package, selecting the best number of knots by BIC.
 
-    For each value of `n_knots` in `n_knots_list`, fits a model with
+    For each value of `nknots` in `nknots_list`, fits a model with
     `wce_survivalgpu` or `wce_WCE` and records its BIC. Returns the result
-    for the `n_knots` value with the lowest BIC.
+    for the `nknots` value with the lowest BIC.
 
     Args:
         package_name (str): either "survivalgpu" or "WCE".
@@ -182,13 +182,13 @@ def run_package_wce(package_name,
         constrained ("right", "left", None or str): shape constraint on the
             WCE risk function (see `wce_survivalgpu` / `wce_WCE`).
         dataset (pandas.DataFrame): the input dataset.
-        n_knots_list (list[int]): candidate numbers of knots to try.
+        nknots_list (list[int]): candidate numbers of knots to try.
         cutoff (int): size of the time window for the risk function.
         dtype (numpy.dtype): floating point precision, only used by
             "survivalgpu".
-        batch_size (int, optional): batch size, only used by "survivalgpu".
+        batchsize (int, optional): batch size, only used by "survivalgpu".
             Defaults to 0.
-        n_bootstraps (int, optional): number of bootstrap resamples, only used
+        nbootstraps (int, optional): number of bootstrap resamples, only used
             by "survivalgpu". Defaults to 0.
         device (str, optional): "cpu" or "cuda", only used by "survivalgpu".
             Defaults to "cpu".
@@ -198,7 +198,7 @@ def run_package_wce(package_name,
     Returns:
         tuple[float or numpy.ndarray, list[float], float]: the
             (hr_result, coef_list, computation_time) of the fit with the
-            lowest BIC among `n_knots_list`. Note `computation_time` is that
+            lowest BIC among `nknots_list`. Note `computation_time` is that
             of the last fit performed, not necessarily the best one.
     """
     time_total = 0
@@ -211,7 +211,7 @@ def run_package_wce(package_name,
     if package_name == "survivalgpu":
 
 
-        for knots in n_knots_list:
+        for knots in nknots_list:
             hr_result, coef_list, computation_time, BIC = wce_survivalgpu(
                 start=start,
                 stop=stop,
@@ -220,10 +220,10 @@ def run_package_wce(package_name,
                 doses=dose,
                 constrained=constrained,
                 dataset=dataset,
-                n_knots=knots,
+                nknots=knots,
                 cutoff=cutoff,
-                batch_size = batch_size,
-                n_bootstraps = n_bootstraps,
+                batchsize = batchsize,
+                nbootstraps = nbootstraps,
                 device = device,
                 dtype = dtype,
                 covariates = covariates
@@ -247,7 +247,7 @@ def run_package_wce(package_name,
 
 
 
-        for knots in n_knots_list:
+        for knots in nknots_list:
             hr_result, coef_list, computation_time, BIC = wce_WCE(
                 start=start,
                 stop=stop,
@@ -256,7 +256,7 @@ def run_package_wce(package_name,
                 dose=dose,
                 constrained=constrained,
                 dataset=dataset,
-                n_knots=knots,
+                nknots=knots,
                 cutoff=cutoff,
                 covariates=covariates
             )
@@ -277,15 +277,15 @@ def run_package_wce(package_name,
 
 
 def run_benchmark_bootstraps(package_name,
-                            start, stop, patient_id, event, dose, constrained, dataset, n_knots_list, cutoff, dtype,
-                            batch_size = 0, n_bootstraps = 0, device ="cpu", covariates = None):
+                            start, stop, patient_id, event, dose, constrained, dataset, nknots_list, cutoff, dtype,
+                            batchsize = 0, nbootstraps = 0, device ="cpu", covariates = None):
     """Runs a WCE fit via `run_package_wce`, optionally with bootstrapping, for benchmarking purposes.
 
-    If `n_bootstraps > 0` and the package is "survivalgpu" running on "cuda",
+    If `nbootstraps > 0` and the package is "survivalgpu" running on "cuda",
     the bootstrap resamples are fit directly (a single timed call covering all
     bootstraps). Otherwise, a single fit without bootstraps is timed and, if
-    `n_bootstraps > 0`, its computation time is extrapolated by multiplying by
-    `n_bootstraps + 1`.
+    `nbootstraps > 0`, its computation time is extrapolated by multiplying by
+    `nbootstraps + 1`.
 
     Args:
         package_name (str): either "survivalgpu" or "WCE".
@@ -297,13 +297,13 @@ def run_benchmark_bootstraps(package_name,
         constrained ("right", "left", None or str): shape constraint on the
             WCE risk function.
         dataset (pandas.DataFrame): the input dataset.
-        n_knots_list (list[int]): candidate numbers of knots, see `run_package_wce`.
+        nknots_list (list[int]): candidate numbers of knots, see `run_package_wce`.
         cutoff (int): size of the time window for the risk function.
         dtype (numpy.dtype): floating point precision, only used by
             "survivalgpu".
-        batch_size (int, optional): batch size, only used by "survivalgpu".
+        batchsize (int, optional): batch size, only used by "survivalgpu".
             Defaults to 0.
-        n_bootstraps (int, optional): number of bootstrap resamples. Defaults
+        nbootstraps (int, optional): number of bootstrap resamples. Defaults
             to 0.
         device (str, optional): "cpu" or "cuda". Defaults to "cpu".
         covariates (list[str] or None, optional): names of additional
@@ -314,23 +314,23 @@ def run_benchmark_bootstraps(package_name,
             (hr_result, coef_list, computation_time) of the selected fit, with
             `computation_time` possibly extrapolated.
     """
-    if n_bootstraps > 0 and package_name == "survivalgpu" and device == "cuda":
+    if nbootstraps > 0 and package_name == "survivalgpu" and device == "cuda":
         return run_package_wce(
             package_name, start, stop, patient_id, event, dose, constrained, dataset,
-            n_knots_list, cutoff, dtype,
-            batch_size=batch_size, n_bootstraps=n_bootstraps, device="cuda", covariates=covariates,
+            nknots_list, cutoff, dtype,
+            batchsize=batchsize, nbootstraps=nbootstraps, device="cuda", covariates=covariates,
         )
 
     # For all other cases (survivalgpu CPU or WCE with bootstraps, or no bootstraps at all):
     # run a single iteration without bootstraps and extrapolate if needed.
     hr_result, coef_list, computation_time = run_package_wce(
         package_name, start, stop, patient_id, event, dose, constrained, dataset,
-        n_knots_list, cutoff, dtype,
-        batch_size=0, n_bootstraps=0, device=device, covariates=covariates,
+        nknots_list, cutoff, dtype,
+        batchsize=0, nbootstraps=0, device=device, covariates=covariates,
     )
 
-    if n_bootstraps > 0:
-        computation_time = computation_time * (n_bootstraps + 1)
+    if nbootstraps > 0:
+        computation_time = computation_time * (nbootstraps + 1)
 
     return hr_result, coef_list, computation_time
     
@@ -341,7 +341,7 @@ def validation_wce_experiment(
     n_iteration,
     n_patients,
     max_time,
-    n_knots_list,
+    nknots_list,
     constraint_list,
     cutoff_list,
     hr_candidates,
@@ -351,11 +351,11 @@ def validation_wce_experiment(
 ):
     """Compares `survivalgpu` and R's `WCE` hazard ratios on simulated datasets.
 
-    For each combination of `constraint_list` x `cutoff_list` x `n_knots_list`,
+    For each combination of `constraint_list` x `cutoff_list` x `nknots_list`,
     runs `n_iteration` simulations with a randomly drawn scenario (from
     `scenario_list`) and target hazard ratio (from `hr_candidates`), fits a WCE
-    model with both "survivalgpu" (cuda, single `n_knots` value) and "WCE" (R,
-    same `n_knots` value), and records the absolute and relative differences
+    model with both "survivalgpu" (cuda, single `nknots` value) and "WCE" (R,
+    same `nknots` value), and records the absolute and relative differences
     between the two packages' hazard ratios at dose 1 vs 0. Results are written
     incrementally to `<output_folder>/<experiment_name>.csv`. A per-combination
     summary of the relative differences is written to
@@ -366,10 +366,10 @@ def validation_wce_experiment(
         output_folder (str or Path): directory where results are written
             (created if needed).
         n_iteration (int): number of simulations per (constraint, cutoff,
-            n_knots) combination.
+            nknots) combination.
         n_patients (int): number of patients to simulate per iteration.
         max_time (int): maximum follow-up time for the simulated datasets.
-        n_knots_list (list[int]): numbers of knots to evaluate.
+        nknots_list (list[int]): numbers of knots to evaluate.
         constraint_list (list): shape constraints to evaluate (e.g. "right",
             "left", None).
         cutoff_list (list[int]): cutoff (risk window) sizes to evaluate.
@@ -395,9 +395,9 @@ def validation_wce_experiment(
 
     rng = np.random.default_rng(seed=seed)
 
-    for (constraint, cutoff, n_knots) in product(constraint_list, cutoff_list, n_knots_list):
+    for (constraint, cutoff, nknots) in product(constraint_list, cutoff_list, nknots_list):
         print(f"\n{'=' * 60}")
-        print(f"Running constraint={constraint}, cutoff={cutoff}, n_knots={n_knots}")
+        print(f"Running constraint={constraint}, cutoff={cutoff}, nknots={nknots}")
         print(f"{'=' * 60}")
         for iteration in range(1, n_iteration + 1):
             scenario = str(rng.choice(scenario_list))
@@ -415,10 +415,10 @@ def validation_wce_experiment(
                 dose = "dose",
                 constrained = constraint,
                 dataset = dataset,
-                n_knots_list = [n_knots],
+                nknots_list = [nknots],
                 cutoff = cutoff,
-                batch_size = 0,
-                n_bootstraps = 0,
+                batchsize = 0,
+                nbootstraps = 0,
                 device = "cuda",
                 dtype = dtype,
             )
@@ -432,7 +432,7 @@ def validation_wce_experiment(
                 dose = "dose",
                 constrained = constraint,
                 dataset = dataset,
-                n_knots_list = [n_knots],
+                nknots_list = [nknots],
                 cutoff = cutoff,
                 dtype = np.float64,
             )
@@ -450,7 +450,7 @@ def validation_wce_experiment(
                 "iteration": iteration,
                 "constraint": constraint_str,
                 "cutoff": cutoff,
-                "n_knots": n_knots,
+                "nknots": nknots,
                 "HR_survivalgpu": HR_survivalgpu["HR"],
                 "coef_survivalgpu": coef_survivalgpu,
                 "time_survivalgpu": time_survivalgpu,
@@ -465,7 +465,7 @@ def validation_wce_experiment(
     df = pd.DataFrame(rows)
 
     df_summary = (
-        df.groupby(["constraint", "cutoff", "n_knots"], as_index=False)
+        df.groupby(["constraint", "cutoff", "nknots"], as_index=False)
         .agg(
             median_relative_difference=("relative_difference", "median"),
             max_relative_difference=("relative_difference", "max"),
@@ -489,10 +489,10 @@ def run_wce_experiment(
     HR_target,
     max_time,
     cutoff,
-    n_knots_list,
+    nknots_list,
     constrained,
-    n_bootstraps=0,
-    batch_size=0,
+    nbootstraps=0,
+    batchsize=0,
     n_iterations=3,
     seed=None,
 ):
@@ -516,11 +516,11 @@ def run_wce_experiment(
         HR_target (float): target hazard ratio for the simulated "dose" covariate.
         max_time (int): maximum follow-up time for the simulated datasets.
         cutoff (int): size of the time window for the risk function.
-        n_knots_list (list[int]): candidate numbers of knots, see `run_package_wce`.
+        nknots_list (list[int]): candidate numbers of knots, see `run_package_wce`.
         constrained ("right", "left" or None): shape constraint on the WCE
             risk function.
-        n_bootstraps (int, optional): number of bootstrap resamples. Defaults to 0.
-        batch_size (int, optional): batch size, only used by "survivalgpu".
+        nbootstraps (int, optional): number of bootstrap resamples. Defaults to 0.
+        batchsize (int, optional): batch size, only used by "survivalgpu".
             Defaults to 0.
         n_iterations (int, optional): number of timed fits per package per
             `n_patients`, averaged. Defaults to 3.
@@ -538,7 +538,7 @@ def run_wce_experiment(
     df_results = []
 
     print(f"\n{'='*60}")
-    print(f"Starting the WCE experiment '{experiment_name}' with scenario='{scenario}', HR_target={HR_target}, cutoff={cutoff}, n_knots_list={n_knots_list}, constrained={constrained}, n_bootstraps={n_bootstraps}, batch_size={batch_size}")
+    print(f"Starting the WCE experiment '{experiment_name}' with scenario='{scenario}', HR_target={HR_target}, cutoff={cutoff}, nknots_list={nknots_list}, constrained={constrained}, nbootstraps={nbootstraps}, batchsize={batchsize}")
     print(f"{'='*60}")
 
     print("\nWarming up packages with 500 patients...")
@@ -560,11 +560,11 @@ def run_wce_experiment(
             dose="dose",
             constrained=constrained,
             dataset=warmup_dataset,
-            n_knots_list=n_knots_list,
+            nknots_list=nknots_list,
             cutoff=cutoff,
             dtype=dtype,
-            batch_size=0,
-            n_bootstraps=0,
+            batchsize=0,
+            nbootstraps=0,
             device=device,
         )
 
@@ -587,7 +587,7 @@ def run_wce_experiment(
         for package, dtype, device in package_dtype_list:
             print(f"  > {package} | dtype={dtype.__name__} | device={device} | n_iterations={n_iterations}")
 
-            # survivalgpu+cuda runs the full n_bootstraps natively; all other cases
+            # survivalgpu+cuda runs the full nbootstraps natively; all other cases
             # are already extrapolated inside run_benchmark_bootstraps.
 
             total_time = 0
@@ -601,11 +601,11 @@ def run_wce_experiment(
                     dose="dose",
                     constrained=constrained,
                     dataset=dataset,
-                    n_knots_list=n_knots_list,
+                    nknots_list=nknots_list,
                     cutoff=cutoff,
                     dtype=dtype,
-                    batch_size=batch_size,
-                    n_bootstraps=n_bootstraps,
+                    batchsize=batchsize,
+                    nbootstraps=nbootstraps,
                     device=device,
                 )
                 total_time += iter_time

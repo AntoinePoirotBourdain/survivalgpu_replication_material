@@ -13,7 +13,7 @@ output_folder     = Path("results")
 n_iteration       = 100
 n_patients        = 1000
 max_time          = 365
-n_knots_list      = [1, 2, 3]
+nknots_list      = [1, 2, 3]
 constraint_list   = [None, "right"]
 cutoff_list       = [180]
 hr_candidates     = [0.25, 0.5, 0.75, 1.5, 2.0, 3.0, 4.0]
@@ -35,7 +35,7 @@ validation_wce_experiment(
     n_iteration=n_iteration,
     n_patients=n_patients,
     max_time=max_time,
-    n_knots_list=n_knots_list,
+    nknots_list=nknots_list,
     constraint_list=constraint_list,
     cutoff_list=cutoff_list,
     hr_candidates=hr_candidates,

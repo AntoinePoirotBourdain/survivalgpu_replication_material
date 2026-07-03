@@ -17,10 +17,10 @@ scenario          = "exponential_scenario"
 HR_target         = 1.5
 max_time          = 365
 cutoff            = 180
-n_knots_list      = [3]
+nknots_list      = [3]
 constrained       = None
-n_bootstraps      = 1000
-batch_size        = 2
+nbootstraps      = 1000
+batchsize        = 2
 seed              = 42
 n_iterations      = 3
 
@@ -43,10 +43,10 @@ run_wce_experiment(
     HR_target=HR_target,
     max_time=max_time,
     cutoff=cutoff,
-    n_knots_list=n_knots_list,
+    nknots_list=nknots_list,
     constrained=constrained,
-    n_bootstraps=n_bootstraps,
-    batch_size=batch_size,
+    nbootstraps=nbootstraps,
+    batchsize=batchsize,
     seed=seed,
     n_iterations=n_iterations,
 )

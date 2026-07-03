@@ -6,7 +6,7 @@ import matplotlib.ticker as ticker
 ############ Figure: Benchmark of Cox with bootstraps
 data_path = Path("results")
 
-n_bootstraps = 1000
+nbootstraps = 1000
 
 dataset_bootstrap     = pd.read_csv(data_path / "figure_3_cox_bootstraps.csv")
 dataset_no_bootstraps = pd.read_csv(data_path / "figure_2_cox.csv")
@@ -21,7 +21,7 @@ package_rename_map = {
 simulated_rows = []
 for cox_name, bootstrap_name in package_rename_map.items():
     rows = dataset_no_bootstraps[dataset_no_bootstraps["package"] == cox_name].copy()
-    rows["mean_time_s"] = rows["mean_time_s"] * n_bootstraps
+    rows["mean_time_s"] = rows["mean_time_s"] * nbootstraps
     rows["package"] = bootstrap_name
     simulated_rows.append(rows)
 
@@ -81,7 +81,7 @@ ax[0].set_xscale("log")
 ax[0].set_yscale("log")
 ax[0].set_xlabel("Number of patients")
 ax[0].set_ylabel("Computation time (s)")
-ax[0].set_title(f"Computation time ({n_bootstraps} bootstraps)")
+ax[0].set_title(f"Computation time ({nbootstraps} bootstraps)")
 ax[0].legend(frameon=False, fontsize=9)
 ax[0].xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{x:,.0f}"))
 ax[0].grid(True, which="major", ls="-",  lw=0.5, alpha=0.4)
@@ -96,7 +96,7 @@ ax[1].set_xscale("log")
 ax[1].set_yscale("log")
 ax[1].set_xlabel("Number of patients")
 ax[1].set_ylabel("Speedup")
-ax[1].set_title(f"Speedup of the survivalGPU implementation ({n_bootstraps} bootstraps)")
+ax[1].set_title(f"Speedup of the survivalGPU implementation ({nbootstraps} bootstraps)")
 ax[1].legend(frameon=False, fontsize=9)
 ax[1].xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"{x:,.0f}"))
 ax[1].yaxis.set_major_formatter(ticker.FuncFormatter(lambda y, _: f"{y:g}x"))
