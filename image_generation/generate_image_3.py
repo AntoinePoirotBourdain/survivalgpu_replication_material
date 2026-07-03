@@ -8,8 +8,8 @@ data_path = Path("results")
 
 nbootstraps = 1000
 
-dataset_bootstrap     = pd.read_csv(data_path / "figure_3_cox_bootstraps.csv")
-dataset_no_bootstraps = pd.read_csv(data_path / "figure_2_cox.csv")
+dataset_bootstrap     = pd.read_csv(data_path / "figure_3.csv")
+dataset_no_bootstraps = pd.read_csv(data_path / "figure_2.csv")
 
 # --- Build unified dataset ---
 package_rename_map = {

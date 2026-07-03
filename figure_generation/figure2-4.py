@@ -12,8 +12,8 @@ from cox_functions import run_cox_experiment
 ########## Figure 2
 
 experiment_name = "figure_2"
-n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
-nbootstraps = 0
+n_patients_list = [500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
+n_bootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [
@@ -45,8 +45,8 @@ print(f"\nFigure 2 experiment took {time.time() - t_start:.2f} seconds")
 
 experiment_name = "figure_3"
 n_patients_list = [500, 1000, 5000, 10000,100000]
-nbootstraps = 1000
-batchsize = 100
+n_bootstraps = 1000
+batch_size = 25
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [
@@ -78,8 +78,10 @@ print(f"\nFigure 3 experiment took {time.time() - t_start:.2f} seconds")
 ############ Figure 4
 
 experiment_name = "figure_4"
+# n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
 n_patients_list = [500, 1000, 5000, 10000, 100000, 500000, 1000000]
-nbootstraps = 0
+
+n_bootstraps = 0
 output_folder = Path("results/")
 n_iterations = 3
 covariate_specs = [

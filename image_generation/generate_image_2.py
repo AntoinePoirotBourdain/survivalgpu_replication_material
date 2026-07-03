@@ -5,7 +5,7 @@ import matplotlib.ticker as ticker
 
 ############ Figure: Benchmark of Cox
 data_path = Path("results")
-df = pd.read_csv(data_path / "figure_2_cox.csv")
+df = pd.read_csv(data_path / "figure_2.csv")
 
 df = df[df["n_patients"] >= 10000]
 

@@ -5,7 +5,7 @@ import matplotlib.ticker as ticker
 
 ############ Figure 5: Benchmark of WCE
 data_path = Path("results")
-df = pd.read_csv(data_path / "figure_5_wce.csv")
+df = pd.read_csv(data_path / "figure_5.csv")
 
 df = df[df["n_patients"] >= 1000]
 

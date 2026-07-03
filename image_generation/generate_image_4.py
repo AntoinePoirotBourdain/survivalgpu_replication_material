@@ -5,7 +5,7 @@ import matplotlib.ticker as ticker
 
 ############ Figure: Benchmark of survivalGPU vs xgboost vs torchsurv
 data_path = Path("results")
-df = pd.read_csv(data_path / "figure_4_gpu_cox.csv")
+df = pd.read_csv(data_path / "figure_4.csv")
 
 df = df[df["n_patients"] >= 5000]
 
