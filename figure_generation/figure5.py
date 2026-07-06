@@ -10,7 +10,7 @@ from wce_functions import run_wce_experiment
 print("Running WCE benchmark without bootstraps...")
 
 experiment_name   = "figure_5"
-output_folder     = Path("benchmark_results")
+output_folder     = Path("results/")
 n_patients_list   = [500, 1000, 5000, 10000, 50000, 100000]
 scenario          = "exponential_scenario"
 HR_target         = 1.5
