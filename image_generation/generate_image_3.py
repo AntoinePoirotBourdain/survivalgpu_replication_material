@@ -13,23 +13,27 @@ dataset_no_bootstraps = pd.read_csv(data_path / "figure_2.csv")
 
 # --- Build unified dataset ---
 package_rename_map = {
-    "cox_r_survival":           "bootstrap_r_survival",
-    "cox_lifelines":            "bootstrap_lifelines",
-    "cox_survival_gpu_cpu_f32": "bootstrap_sgpu_cpu_f32",
+    ("survival", "cpu"):    "bootstrap_r_survival",
+    ("lifelines", "cpu"):   "bootstrap_lifelines",
+    ("survivalgpu", "cpu"): "bootstrap_sgpu_cpu_f32",
 }
 
 simulated_rows = []
-for cox_name, bootstrap_name in package_rename_map.items():
-    rows = dataset_no_bootstraps[dataset_no_bootstraps["package"] == cox_name].copy()
-    rows["mean_time_s"] = rows["mean_time_s"] * nbootstraps
+for (cox_package, cox_device), bootstrap_name in package_rename_map.items():
+    rows = dataset_no_bootstraps[
+        (dataset_no_bootstraps["package"] == cox_package)
+        & (dataset_no_bootstraps["device"] == cox_device)
+    ].copy()
+    rows["computation_time"] = rows["computation_time"] * nbootstraps
     rows["package"] = bootstrap_name
     simulated_rows.append(rows)
 
-df = pd.concat(
-    [dataset_bootstrap[dataset_bootstrap["package"] == "bootstrap_sgpu_cuda_f32"]]
-    + simulated_rows,
-    ignore_index=True,
-)
+actual_bootstrap = dataset_bootstrap[
+    (dataset_bootstrap["package"] == "survivalgpu") & (dataset_bootstrap["device"] == "cuda")
+].copy()
+actual_bootstrap["package"] = "bootstrap_sgpu_cuda_f32"
+
+df = pd.concat([actual_bootstrap] + simulated_rows, ignore_index=True)
 
 df = df[df["n_patients"] >= 1000]
 
@@ -53,10 +57,10 @@ survivalgpu_cpu  = align(survivalgpu_cpu)
 survivalgpu_cuda = align(survivalgpu_cuda)
 
 n_patients            = survivalgpu_cuda["n_patients"].values
-r_survival_time       = r_survival["mean_time_s"].values
-lifelines_time        = lifelines["mean_time_s"].values
-survivalgpu_cpu_time  = survivalgpu_cpu["mean_time_s"].values
-survivalgpu_cuda_time = survivalgpu_cuda["mean_time_s"].values
+r_survival_time       = r_survival["computation_time"].values
+lifelines_time        = lifelines["computation_time"].values
+survivalgpu_cpu_time  = survivalgpu_cpu["computation_time"].values
+survivalgpu_cuda_time = survivalgpu_cuda["computation_time"].values
 
 speedup_against_r_survival      = r_survival_time     / survivalgpu_cuda_time
 speedup_against_lifelines       = lifelines_time       / survivalgpu_cuda_time

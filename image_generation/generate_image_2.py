@@ -9,16 +9,16 @@ df = pd.read_csv(data_path / "figure_2.csv")
 
 df = df[df["n_patients"] >= 10000]
 
-r_survival       = df[df["package"] == "cox_r_survival"]
-lifelines        = df[df["package"] == "cox_lifelines"]
-survivalgpu_cpu  = df[df["package"] == "cox_survival_gpu_cpu_f32"]
-survivalgpu_cuda = df[df["package"] == "cox_survival_gpu_cuda_f32"]
+r_survival       = df[(df["package"] == "survival")    & (df["device"] == "cpu")]
+lifelines        = df[(df["package"] == "lifelines")   & (df["device"] == "cpu")]
+survivalgpu_cpu  = df[(df["package"] == "survivalgpu") & (df["device"] == "cpu")]
+survivalgpu_cuda = df[(df["package"] == "survivalgpu") & (df["device"] == "cuda")]
 
 n_patients            = survivalgpu_cuda["n_patients"].values
-r_survival_time       = r_survival["mean_time_s"].values
-lifelines_time        = lifelines["mean_time_s"].values
-survivalgpu_cpu_time  = survivalgpu_cpu["mean_time_s"].values
-survivalgpu_cuda_time = survivalgpu_cuda["mean_time_s"].values
+r_survival_time       = r_survival["computation_time"].values
+lifelines_time        = lifelines["computation_time"].values
+survivalgpu_cpu_time  = survivalgpu_cpu["computation_time"].values
+survivalgpu_cuda_time = survivalgpu_cuda["computation_time"].values
 
 speedup_against_r_survival      = r_survival_time      / survivalgpu_cuda_time
 speedup_against_lifelines       = lifelines_time        / survivalgpu_cuda_time
