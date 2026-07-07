@@ -9,7 +9,7 @@ from cox_functions import run_cox_experiment
 # tuples, where kind is "constant" or "time_dep".
 
 
-########## Figure 2
+######### Figure 2
 
 experiment_name = "figure_2"
 n_patients_list = [500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
@@ -92,8 +92,8 @@ covariate_specs = [
 package_device_dtype_list = [
     ("survivalgpu", "cuda", np.float32),
     ("survival", "cpu", np.float64),
-    ("xgboost", "cpu", np.float32),
-    ("torchsurv", "cpu", np.float32),
+    ("xgboost", "cuda", np.float32),
+    ("torchsurv", "cuda", np.float32),
 ]
 
 t_start = time.time()
