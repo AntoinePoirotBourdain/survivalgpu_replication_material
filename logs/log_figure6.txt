@@ -1,0 +1,119 @@
+
+============================================================
+Starting the WCE experiment 'figure_6' with scenario='exponential_scenario', HR_target=1.5, cutoff=180, n_knots_list=[3], constrained=None, n_bootstraps=1000, batch_size=2
+============================================================
+
+Warming up packages with 500 patients...
+  warming up survivalgpu | dtype=float32 | device=cuda
+  warming up survivalgpu | dtype=float32 | device=cpu
+  warming up WCE | dtype=float64 | device=cpu
+
+--- n_patients=500 | scenario=exponential_scenario | HR_target=1.5 | cutoff=180 ---
+  dataset: 73586 rows, 500 patients | simulation time: 0.2499 seconds
+  > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
+      iteration 1/3: 596.5433 seconds
+      iteration 2/3: 596.4461 seconds
+      iteration 3/3: 593.2947 seconds
+    mean time over 3 iterations: 595.4280 seconds
+  > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
+      iteration 1/3: 1150.5742 seconds
+      iteration 2/3: 1144.5104 seconds
+      iteration 3/3: 1151.8446 seconds
+    mean time over 3 iterations: 1148.9764 seconds
+  > WCE | dtype=float64 | device=cpu | n_iterations=3
+      iteration 1/3: 859.8489 seconds
+      iteration 2/3: 765.2040 seconds
+      iteration 3/3: 796.3841 seconds
+    mean time over 3 iterations: 807.1457 seconds
+
+--- n_patients=1000 | scenario=exponential_scenario | HR_target=1.5 | cutoff=180 ---
+  dataset: 151337 rows, 1000 patients | simulation time: 0.5199 seconds
+  > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
+      iteration 1/3: 594.7770 seconds
+      iteration 2/3: 595.3029 seconds
+      iteration 3/3: 592.7733 seconds
+    mean time over 3 iterations: 594.2844 seconds
+  > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
+      iteration 1/3: 1953.8166 seconds
+      iteration 2/3: 1937.6018 seconds
+      iteration 3/3: 1937.3130 seconds
+    mean time over 3 iterations: 1942.9104 seconds
+  > WCE | dtype=float64 | device=cpu | n_iterations=3
+      iteration 1/3: 2256.7659 seconds
+      iteration 2/3: 2283.0950 seconds
+      iteration 3/3: 2230.0740 seconds
+    mean time over 3 iterations: 2256.6449 seconds
+
+--- n_patients=5000 | scenario=exponential_scenario | HR_target=1.5 | cutoff=180 ---
+  dataset: 766857 rows, 5000 patients | simulation time: 2.8708 seconds
+  > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
+      iteration 1/3: 598.5008 seconds
+      iteration 2/3: 597.1413 seconds
+      iteration 3/3: 601.0237 seconds
+    mean time over 3 iterations: 598.8886 seconds
+  > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
+      iteration 1/3: 8418.5430 seconds
+      iteration 2/3: 8275.9622 seconds
+      iteration 3/3: 8411.2855 seconds
+    mean time over 3 iterations: 8368.5969 seconds
+  > WCE | dtype=float64 | device=cpu | n_iterations=3
+      iteration 1/3: 26924.0839 seconds
+      iteration 2/3: 22750.7203 seconds
+      iteration 3/3: 21932.4437 seconds
+    mean time over 3 iterations: 23869.0827 seconds
+
+--- n_patients=10000 | scenario=exponential_scenario | HR_target=1.5 | cutoff=180 ---
+  dataset: 1539613 rows, 10000 patients | simulation time: 6.5013 seconds
+  > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
+      iteration 1/3: 696.1284 seconds
+      iteration 2/3: 692.2374 seconds
+      iteration 3/3: 697.5254 seconds
+    mean time over 3 iterations: 695.2971 seconds
+  > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
+      iteration 1/3: 18269.3967 seconds
+      iteration 2/3: 18300.0668 seconds
+      iteration 3/3: 18346.1601 seconds
+    mean time over 3 iterations: 18305.2079 seconds
+  > WCE | dtype=float64 | device=cpu | n_iterations=3
+      iteration 1/3: 71948.2349 seconds
+      iteration 2/3: 71031.7180 seconds
+      iteration 3/3: 68740.6567 seconds
+    mean time over 3 iterations: 70573.5365 seconds
+
+--- n_patients=50000 | scenario=exponential_scenario | HR_target=1.5 | cutoff=180 ---
+  dataset: 7604357 rows, 50000 patients | simulation time: 57.0988 seconds
+  > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
+      iteration 1/3: 2416.0171 seconds
+      iteration 2/3: 2402.4218 seconds
+      iteration 3/3: 2410.8045 seconds
+    mean time over 3 iterations: 2409.7478 seconds
+  > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
+      iteration 1/3: 98590.1250 seconds
+      iteration 2/3: 98749.7214 seconds
+      iteration 3/3: 98666.9571 seconds
+    mean time over 3 iterations: 98668.9345 seconds
+  > WCE | dtype=float64 | device=cpu | n_iterations=3
+      iteration 1/3: 1829609.0298 seconds
+      iteration 2/3: 1475883.3261 seconds
+      iteration 3/3: 1335822.9643 seconds
+    mean time over 3 iterations: 1547105.1067 seconds
+
+--- n_patients=100000 | scenario=exponential_scenario | HR_target=1.5 | cutoff=180 ---
+  dataset: 15298151 rows, 100000 patients | simulation time: 157.4315 seconds
+  > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
+      iteration 1/3: 5025.5374 seconds
+      iteration 2/3: 5033.9016 seconds
+      iteration 3/3: 5031.2568 seconds
+    mean time over 3 iterations: 5030.2319 seconds
+  > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
+      iteration 1/3: 200974.8878 seconds
+      iteration 2/3: 201175.1890 seconds
+      iteration 3/3: 201129.4573 seconds
+    mean time over 3 iterations: 201093.1780 seconds
+  > WCE | dtype=float64 | device=cpu | n_iterations=3
+      iteration 1/3: 6834661.6196 seconds
+      iteration 2/3: 7323979.3180 seconds
+      iteration 3/3: 7240752.6167 seconds
+    mean time over 3 iterations: 7133131.1847 seconds
+
+Figure 6 experiment took 57898.15 seconds
