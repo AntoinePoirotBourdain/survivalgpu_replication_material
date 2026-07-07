@@ -69,26 +69,53 @@ All commands below assume the working directory is
 ### 1. Run the benchmark / validation experiments
 
 ```bash
-bash scripts/figure2-4.sh   # Cox benchmark (figures 2-4)
-bash scripts/figure5.sh     # WCE benchmark without bootstraps (figure 5)
-bash scripts/figure6.sh     # WCE benchmark with bootstraps (figure 6)
-bash scripts/table1.sh      # Cox validation (table 1)
-bash scripts/table2.sh      # WCE validation (table 2)
+bash scripts/figure2-4.sh   # Cox benchmark (figures 2-4)      — requires a CUDA GPU
+bash scripts/figure5.sh     # WCE benchmark without bootstraps (figure 5) — requires a CUDA GPU
+bash scripts/figure6.sh     # WCE benchmark with bootstraps (figure 6)    — requires a CUDA GPU
+bash scripts/table1-4.sh    # Cox and WCE validation (tables 1-4)
 ```
 
+`figure2-4.sh`, `figure5.sh`, and `figure6.sh` benchmark `survivalgpu` on
+`device="cuda"` and therefore need a CUDA-capable GPU. `table1-4.sh` falls
+back to the CPU automatically when no GPU is available (see
+`wce_functions.py`), so it can be run on any machine.
+
 Each one runs in the background and logs to `logs/log_<name>.txt`; raw
-results are written as CSV to `results/` (`figure5.sh` writes to
-`benchmark_results/`). Tail a log to follow progress, e.g.:
+results and their summaries (median/max relative differences) are written
+as CSV to `results/` (`figure5.sh` writes to `benchmark_results/`). Tail a
+log to follow progress, e.g.:
 
 ```bash
 tail -f logs/log_figure2-4.txt
 ```
 
+`table1-4.sh` produces four validation tables: table 1 (Cox, float32),
+table 2 (Cox, float64), table 3 (WCE, float32), and table 4 (WCE,
+float64). In the paper itself, tables 1 and 2 are combined into a single
+table 1, and tables 3 and 4 are combined into a single table 2 — the
+float32/float64 columns sit side by side rather than in separate tables.
+
+Approximate wall-clock time on our machine (single CUDA GPU), from the logs
+in `logs/`:
+
+| Script | Experiment | Time |
+| --- | --- | --- |
+| `figure2-4.sh` | figure 2 | 40m 22s |
+| | figure 3 | 9m 16s |
+| | figure 4 | 1h 9m 55s |
+| | **total** | **~1h 59m** |
+| `figure5.sh` | figure 5 | ~7h 55m |
+| `figure6.sh` | figure 6 | ~16h 5m |
+| `table1-4.sh` | table 1 | 13m 8s |
+| | table 2 | 12m 53s |
+| | table 3 | 46m 47s |
+| | table 4 | 46m 52s |
+| | **total** | **~1h 59m** |
+
 ### 2. Generate the figures (PDFs) from the results
 
 ```bash
-bash scripts/generate_images.sh                 # figures 2-6
-python image_generation/generate_image_8.py     # figure 8 (WCE weight scenarios)
+bash scripts/generate_images.sh   # figures 2-6 and 8 (WCE weight scenarios)
 ```
 
 PDFs are written to `figures/`.
@@ -128,7 +155,8 @@ and writes the weight-function plot to `figures/figure_7.pdf`.
   helpers (model-fitting wrappers, simulated dataset generation) used by the
   experiment scripts.
 - `figure_generation/` — scripts that run the Cox/WCE benchmark and
-  validation experiments (figures 2-6, tables 1-2).
+  validation experiments (figures 2-6, tables 1-4; see note above on how
+  these map to the paper's tables 1-2).
 - `image_generation/` — scripts that turn experiment results (`results/`,
   `benchmark_results/`) into the paper's PDF figures (`figures/`).
 - `scripts/` — shell wrappers around the experiment scripts.
