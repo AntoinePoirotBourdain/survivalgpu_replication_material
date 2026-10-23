@@ -22,25 +22,33 @@ python3 -m venv .venv
 source .venv/bin/activate  # on Windows: .venv\Scripts\activate
 ```
 
-Then install survivalGPU (with the `all` extra) and this repository:
+Then install survivalGPU (with the `wce` extra, which adds `pykeops`) and
+this repository:
 
 ```bash
-pip install -e ../survivalGPU[all]
+pip install -e "../survivalGPU[wce]"
 pip install -e .
 ```
 
-`pykeops`, one of survivalGPU's core dependencies, just-in-time compiles
-CUDA/C++ kernels, so a working C++ compiler is required; a CUDA-capable GPU
-is optional (the package falls back to CPU otherwise).
+`pykeops`, needed by the WCE model, just-in-time compiles CUDA/C++ kernels,
+so a working C++ compiler is required; a CUDA-capable GPU is optional (the
+package falls back to CPU otherwise).
 
 ### R
 
-The R-only `illustration.R` script (see below) and the WCE
-validation/benchmark code (called via `rpy2`) need R, plus the `WCE`,
-`remotes`, and `reticulate` packages:
+The two R illustration scripts (see below) and the validation/benchmark
+code that calls R through `rpy2` need R >= 4.1 and these packages:
+
+| Package | Used by |
+| --- | --- |
+| `survival` | reference Cox fits (validation), `illustration_cox.R` |
+| `WCE` | reference WCE fits (validation/benchmarks), `drugdata` in `illustration_wce.R` |
+| `survminer` | plots in `illustration_cox.R` |
+| `reticulate` | used by the survivalGPU R package to call Python |
+| `remotes` | installing the survivalGPU R package below |
 
 ```r
-install.packages(c("WCE", "remotes", "reticulate"))
+install.packages(c("survival", "WCE", "survminer", "reticulate", "remotes"))
 ```
 
 The survivalGPU R package is a thin wrapper around the Python package
@@ -53,13 +61,12 @@ remotes::install_local("../survivalGPU/R")
 
 By default, `reticulate` picks its own Python interpreter, which may not
 have `survivalgpu` installed. Point it at the virtual environment created
-in the Python setup step by setting `RETICULATE_PYTHON` before launching R:
+in the Python setup step by setting `RETICULATE_PYTHON` before launching R
+(from this directory):
 
 ```bash
-export RETICULATE_PYTHON=/path/to/survivalgpu_replication_material/.venv/bin/python
+export RETICULATE_PYTHON="$PWD/.venv/bin/python"
 ```
-
-> **Warning**: survivalGPU is not currently available on Windows.
 
 ## Reproducing the paper's figures and tables
 
@@ -120,34 +127,16 @@ bash scripts/generate_images.sh   # figures 2-6 and 8 (WCE weight scenarios)
 
 PDFs are written to `figures/`.
 
-### 3. Worked example ("Illustration" section, figure 7)
+### 3. Illustration (Section 7 of the paper)
 
-`illustration.R` reproduces the `drugdata` worked example from the paper's
-Illustration section: a BIC-based model selection grid over `nknots` and
-`constrained`, a bootstrap refit (`B = 100`) of the selected model, the
-weight-function plot, and the hazard-ratio calculation. Unlike the rest of
-this repository, it drives survivalGPU's R interface directly rather than
-its Python API. It needs the R setup and `RETICULATE_PYTHON` environment
-variable described in "Installation" above.
-
-With `RETICULATE_PYTHON` set and the working directory set to this
-repository (`survivalgpu_replication_material`):
+`illustration_cox.R` and `illustration_wce.R` reproduce Section 7
+(Illustration) of the paper, for the Cox and WCE models. With
+`RETICULATE_PYTHON` set (see "Installation"):
 
 ```bash
-Rscript illustration.R
+Rscript illustration_cox.R
+Rscript illustration_wce.R
 ```
-
-or, from an interactive R session:
-
-```r
-setwd("path/to/survivalgpu_replication_material")
-source("illustration.R")
-```
-
-The script attaches `WCE` and `survivalGPU`, loads `WCE::drugdata`, and runs
-the workflow above. It prints the BIC comparison table, the selected
-model's `summary()` output, and the hazard-ratio estimate to the console,
-and writes the weight-function plot to `figures/figure_7.pdf`.
 
 ## Repository layout
 
@@ -160,8 +149,8 @@ and writes the weight-function plot to `figures/figure_7.pdf`.
 - `image_generation/` — scripts that turn experiment results (`results/`,
   `benchmark_results/`) into the paper's PDF figures (`figures/`).
 - `scripts/` — shell wrappers around the experiment scripts.
-- `illustration.R` — standalone R script reproducing the paper's
-  "Illustration" section (figure 7) on the `WCE::drugdata` data set.
+- `illustration_cox.R`, `illustration_wce.R` — Section 7 (Illustration) of
+  the paper, for the Cox and WCE models.
 - `results/`, `benchmark_results/` — experiment output (CSV).
 - `figures/` — generated PDF figures.
 - `logs/` — logs from background experiment runs.
