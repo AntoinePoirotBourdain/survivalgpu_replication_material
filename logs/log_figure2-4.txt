@@ -11,235 +11,235 @@ Warming up packages with 500 patients...
 
 --- n_patients=500 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 3550 rows | simulation time: 0.1896 seconds
+  dataset: 3534 rows | simulation time: 0.2119 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.6543 seconds
-      iteration 2/3: 0.6431 seconds
-      iteration 3/3: 0.6536 seconds
-    mean time over 3 iterations: 0.6503 seconds
+      iteration 1/3: 0.6347 seconds
+      iteration 2/3: 0.5968 seconds
+      iteration 3/3: 0.6202 seconds
+    mean time over 3 iterations: 0.6173 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 0.1885 seconds
-      iteration 2/3: 0.1785 seconds
-      iteration 3/3: 0.1805 seconds
-    mean time over 3 iterations: 0.1825 seconds
+      iteration 1/3: 0.2008 seconds
+      iteration 2/3: 0.1778 seconds
+      iteration 3/3: 0.1776 seconds
+    mean time over 3 iterations: 0.1854 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
       iteration 1/3: 0.0066 seconds
-      iteration 2/3: 0.0068 seconds
+      iteration 2/3: 0.0067 seconds
       iteration 3/3: 0.0066 seconds
-    mean time over 3 iterations: 0.0067 seconds
+    mean time over 3 iterations: 0.0066 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.1301 seconds
-      iteration 2/3: 0.1182 seconds
-      iteration 3/3: 0.1173 seconds
-    mean time over 3 iterations: 0.1219 seconds
+      iteration 1/3: 0.1275 seconds
+      iteration 2/3: 0.1496 seconds
+      iteration 3/3: 0.1114 seconds
+    mean time over 3 iterations: 0.1295 seconds
 
 --- n_patients=1000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 7363 rows | simulation time: 0.3852 seconds
+  dataset: 7225 rows | simulation time: 0.3674 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.5979 seconds
-      iteration 2/3: 0.6443 seconds
-      iteration 3/3: 0.6227 seconds
-    mean time over 3 iterations: 0.6216 seconds
+      iteration 1/3: 0.6041 seconds
+      iteration 2/3: 0.6339 seconds
+      iteration 3/3: 0.6203 seconds
+    mean time over 3 iterations: 0.6194 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 0.2114 seconds
-      iteration 2/3: 0.2019 seconds
-      iteration 3/3: 0.2069 seconds
-    mean time over 3 iterations: 0.2067 seconds
+      iteration 1/3: 0.2056 seconds
+      iteration 2/3: 0.1959 seconds
+      iteration 3/3: 0.1987 seconds
+    mean time over 3 iterations: 0.2001 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.0096 seconds
-      iteration 2/3: 0.0168 seconds
-      iteration 3/3: 0.0087 seconds
-    mean time over 3 iterations: 0.0117 seconds
+      iteration 1/3: 0.0094 seconds
+      iteration 2/3: 0.0167 seconds
+      iteration 3/3: 0.0086 seconds
+    mean time over 3 iterations: 0.0116 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.2413 seconds
-      iteration 2/3: 0.2289 seconds
-      iteration 3/3: 0.2290 seconds
-    mean time over 3 iterations: 0.2331 seconds
+      iteration 1/3: 0.2114 seconds
+      iteration 2/3: 0.2218 seconds
+      iteration 3/3: 0.2190 seconds
+    mean time over 3 iterations: 0.2174 seconds
 
 --- n_patients=5000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 36250 rows | simulation time: 1.9590 seconds
+  dataset: 36636 rows | simulation time: 1.9290 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.3927 seconds
-      iteration 2/3: 0.4249 seconds
-      iteration 3/3: 0.3328 seconds
-    mean time over 3 iterations: 0.3834 seconds
+      iteration 1/3: 0.6828 seconds
+      iteration 2/3: 0.6169 seconds
+      iteration 3/3: 0.5663 seconds
+    mean time over 3 iterations: 0.6220 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 0.3070 seconds
-      iteration 2/3: 0.3002 seconds
-      iteration 3/3: 0.2986 seconds
-    mean time over 3 iterations: 0.3020 seconds
+      iteration 1/3: 0.3150 seconds
+      iteration 2/3: 0.3008 seconds
+      iteration 3/3: 0.2944 seconds
+    mean time over 3 iterations: 0.3034 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.0373 seconds
-      iteration 2/3: 0.0381 seconds
-      iteration 3/3: 0.0387 seconds
-    mean time over 3 iterations: 0.0380 seconds
+      iteration 1/3: 0.0379 seconds
+      iteration 2/3: 0.0386 seconds
+      iteration 3/3: 0.0381 seconds
+    mean time over 3 iterations: 0.0382 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.8221 seconds
-      iteration 2/3: 0.8119 seconds
-      iteration 3/3: 0.8125 seconds
-    mean time over 3 iterations: 0.8155 seconds
+      iteration 1/3: 0.8167 seconds
+      iteration 2/3: 0.8032 seconds
+      iteration 3/3: 0.8101 seconds
+    mean time over 3 iterations: 0.8100 seconds
 
 --- n_patients=10000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 74057 rows | simulation time: 4.2668 seconds
+  dataset: 73447 rows | simulation time: 4.2321 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.5262 seconds
-      iteration 2/3: 0.6164 seconds
-      iteration 3/3: 0.4143 seconds
-    mean time over 3 iterations: 0.5190 seconds
+      iteration 1/3: 0.3893 seconds
+      iteration 2/3: 0.3901 seconds
+      iteration 3/3: 0.3697 seconds
+    mean time over 3 iterations: 0.3830 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 0.4205 seconds
-      iteration 2/3: 0.4087 seconds
-      iteration 3/3: 0.4086 seconds
-    mean time over 3 iterations: 0.4126 seconds
+      iteration 1/3: 0.4187 seconds
+      iteration 2/3: 0.4070 seconds
+      iteration 3/3: 0.4069 seconds
+    mean time over 3 iterations: 0.4109 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.1585 seconds
-      iteration 2/3: 0.1566 seconds
-      iteration 3/3: 0.1644 seconds
-    mean time over 3 iterations: 0.1598 seconds
+      iteration 1/3: 0.1554 seconds
+      iteration 2/3: 0.1547 seconds
+      iteration 3/3: 0.1583 seconds
+    mean time over 3 iterations: 0.1561 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 1.4813 seconds
-      iteration 2/3: 1.4821 seconds
-      iteration 3/3: 1.5776 seconds
-    mean time over 3 iterations: 1.5136 seconds
+      iteration 1/3: 1.4720 seconds
+      iteration 2/3: 1.4754 seconds
+      iteration 3/3: 1.5770 seconds
+    mean time over 3 iterations: 1.5082 seconds
 
 --- n_patients=50000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 368494 rows | simulation time: 36.8085 seconds
+  dataset: 366654 rows | simulation time: 36.6767 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.5195 seconds
-      iteration 2/3: 0.3833 seconds
-      iteration 3/3: 0.4355 seconds
-    mean time over 3 iterations: 0.4461 seconds
+      iteration 1/3: 0.4721 seconds
+      iteration 2/3: 0.4345 seconds
+      iteration 3/3: 0.4493 seconds
+    mean time over 3 iterations: 0.4520 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 1.2941 seconds
-      iteration 2/3: 1.2666 seconds
-      iteration 3/3: 1.2484 seconds
-    mean time over 3 iterations: 1.2697 seconds
+      iteration 1/3: 1.2622 seconds
+      iteration 2/3: 1.2171 seconds
+      iteration 3/3: 1.2578 seconds
+    mean time over 3 iterations: 1.2457 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.7991 seconds
-      iteration 2/3: 0.5986 seconds
-      iteration 3/3: 0.7164 seconds
-    mean time over 3 iterations: 0.7047 seconds
+      iteration 1/3: 0.8247 seconds
+      iteration 2/3: 0.5924 seconds
+      iteration 3/3: 0.5857 seconds
+    mean time over 3 iterations: 0.6676 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 6.2134 seconds
-      iteration 2/3: 6.2317 seconds
-      iteration 3/3: 6.2415 seconds
-    mean time over 3 iterations: 6.2289 seconds
+      iteration 1/3: 6.1690 seconds
+      iteration 2/3: 6.1433 seconds
+      iteration 3/3: 6.1546 seconds
+    mean time over 3 iterations: 6.1556 seconds
 Generating 100000 patients in 2 batches of up to 50000...
-  batch 1/2 (50000 patients): 36.89s
-  batch 2/2 (50000 patients): 36.89s
-Total simulation time for 100000 patients: 73.79s
+  batch 1/2 (50000 patients): 36.62s
+  batch 2/2 (50000 patients): 36.57s
+Total simulation time for 100000 patients: 73.20s
 
 --- n_patients=100000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 737413 rows | simulation time: 73.7860 seconds
+  dataset: 733869 rows | simulation time: 73.1986 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.5421 seconds
-      iteration 2/3: 0.6316 seconds
-      iteration 3/3: 0.5752 seconds
-    mean time over 3 iterations: 0.5830 seconds
+      iteration 1/3: 0.5191 seconds
+      iteration 2/3: 0.5750 seconds
+      iteration 3/3: 0.6117 seconds
+    mean time over 3 iterations: 0.5686 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 2.5939 seconds
-      iteration 2/3: 2.5775 seconds
-      iteration 3/3: 2.5830 seconds
-    mean time over 3 iterations: 2.5848 seconds
+      iteration 1/3: 2.5748 seconds
+      iteration 2/3: 2.5766 seconds
+      iteration 3/3: 2.5560 seconds
+    mean time over 3 iterations: 2.5691 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 1.2223 seconds
-      iteration 2/3: 1.4843 seconds
-      iteration 3/3: 1.3374 seconds
-    mean time over 3 iterations: 1.3480 seconds
+      iteration 1/3: 1.2235 seconds
+      iteration 2/3: 1.2542 seconds
+      iteration 3/3: 1.4704 seconds
+    mean time over 3 iterations: 1.3160 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 12.6264 seconds
-      iteration 2/3: 12.6336 seconds
-      iteration 3/3: 12.6329 seconds
-    mean time over 3 iterations: 12.6310 seconds
+      iteration 1/3: 12.6391 seconds
+      iteration 2/3: 12.5606 seconds
+      iteration 3/3: 12.5472 seconds
+    mean time over 3 iterations: 12.5823 seconds
 Generating 500000 patients in 10 batches of up to 50000...
-  batch 1/10 (50000 patients): 36.88s
-  batch 2/10 (50000 patients): 36.87s
-  batch 3/10 (50000 patients): 36.84s
-  batch 4/10 (50000 patients): 36.85s
-  batch 5/10 (50000 patients): 36.84s
-  batch 6/10 (50000 patients): 36.79s
-  batch 7/10 (50000 patients): 36.76s
-  batch 8/10 (50000 patients): 36.73s
-  batch 9/10 (50000 patients): 36.86s
-  batch 10/10 (50000 patients): 36.80s
-Total simulation time for 500000 patients: 368.23s
+  batch 1/10 (50000 patients): 36.54s
+  batch 2/10 (50000 patients): 36.57s
+  batch 3/10 (50000 patients): 36.49s
+  batch 4/10 (50000 patients): 36.55s
+  batch 5/10 (50000 patients): 36.56s
+  batch 6/10 (50000 patients): 36.54s
+  batch 7/10 (50000 patients): 36.48s
+  batch 8/10 (50000 patients): 36.50s
+  batch 9/10 (50000 patients): 36.58s
+  batch 10/10 (50000 patients): 36.68s
+Total simulation time for 500000 patients: 365.53s
 
 --- n_patients=500000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 3673237 rows | simulation time: 368.2365 seconds
+  dataset: 3674033 rows | simulation time: 365.5299 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 1.4587 seconds
-      iteration 2/3: 1.4644 seconds
-      iteration 3/3: 1.4628 seconds
-    mean time over 3 iterations: 1.4620 seconds
+      iteration 1/3: 1.4734 seconds
+      iteration 2/3: 1.4524 seconds
+      iteration 3/3: 1.4413 seconds
+    mean time over 3 iterations: 1.4557 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 14.7073 seconds
-      iteration 2/3: 14.6864 seconds
-      iteration 3/3: 14.7699 seconds
-    mean time over 3 iterations: 14.7212 seconds
+      iteration 1/3: 14.4887 seconds
+      iteration 2/3: 14.5567 seconds
+      iteration 3/3: 14.4956 seconds
+    mean time over 3 iterations: 14.5137 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 9.5120 seconds
-      iteration 2/3: 7.5548 seconds
-      iteration 3/3: 7.6048 seconds
-    mean time over 3 iterations: 8.2238 seconds
+      iteration 1/3: 9.6033 seconds
+      iteration 2/3: 7.0300 seconds
+      iteration 3/3: 8.6292 seconds
+    mean time over 3 iterations: 8.4208 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 65.0300 seconds
-      iteration 2/3: 65.5045 seconds
-      iteration 3/3: 64.9055 seconds
-    mean time over 3 iterations: 65.1467 seconds
+      iteration 1/3: 64.5636 seconds
+      iteration 2/3: 64.5285 seconds
+      iteration 3/3: 64.5161 seconds
+    mean time over 3 iterations: 64.5360 seconds
 Generating 1000000 patients in 20 batches of up to 50000...
-  batch 1/20 (50000 patients): 36.86s
-  batch 2/20 (50000 patients): 36.92s
-  batch 3/20 (50000 patients): 36.85s
-  batch 4/20 (50000 patients): 36.91s
-  batch 5/20 (50000 patients): 36.92s
-  batch 6/20 (50000 patients): 36.94s
-  batch 7/20 (50000 patients): 36.90s
-  batch 8/20 (50000 patients): 36.93s
-  batch 9/20 (50000 patients): 36.91s
-  batch 10/20 (50000 patients): 36.93s
-  batch 11/20 (50000 patients): 36.94s
-  batch 12/20 (50000 patients): 36.91s
-  batch 13/20 (50000 patients): 36.91s
-  batch 14/20 (50000 patients): 36.88s
-  batch 15/20 (50000 patients): 36.91s
-  batch 16/20 (50000 patients): 36.86s
-  batch 17/20 (50000 patients): 36.75s
-  batch 18/20 (50000 patients): 36.85s
-  batch 19/20 (50000 patients): 36.81s
-  batch 20/20 (50000 patients): 36.77s
-Total simulation time for 1000000 patients: 737.75s
+  batch 1/20 (50000 patients): 36.43s
+  batch 2/20 (50000 patients): 36.53s
+  batch 3/20 (50000 patients): 36.51s
+  batch 4/20 (50000 patients): 36.53s
+  batch 5/20 (50000 patients): 36.49s
+  batch 6/20 (50000 patients): 36.44s
+  batch 7/20 (50000 patients): 36.52s
+  batch 8/20 (50000 patients): 36.53s
+  batch 9/20 (50000 patients): 36.51s
+  batch 10/20 (50000 patients): 36.54s
+  batch 11/20 (50000 patients): 36.51s
+  batch 12/20 (50000 patients): 36.49s
+  batch 13/20 (50000 patients): 36.53s
+  batch 14/20 (50000 patients): 36.46s
+  batch 15/20 (50000 patients): 36.55s
+  batch 16/20 (50000 patients): 36.49s
+  batch 17/20 (50000 patients): 36.52s
+  batch 18/20 (50000 patients): 36.51s
+  batch 19/20 (50000 patients): 36.49s
+  batch 20/20 (50000 patients): 36.47s
+Total simulation time for 1000000 patients: 730.10s
 
 --- n_patients=1000000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 7352873 rows | simulation time: 737.7517 seconds
+  dataset: 7355448 rows | simulation time: 730.0961 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 2.8026 seconds
-      iteration 2/3: 2.7854 seconds
-      iteration 3/3: 2.7814 seconds
-    mean time over 3 iterations: 2.7898 seconds
+      iteration 1/3: 2.7561 seconds
+      iteration 2/3: 2.7418 seconds
+      iteration 3/3: 2.7499 seconds
+    mean time over 3 iterations: 2.7492 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 31.8504 seconds
-      iteration 2/3: 31.6962 seconds
-      iteration 3/3: 31.7919 seconds
-    mean time over 3 iterations: 31.7795 seconds
+      iteration 1/3: 31.6842 seconds
+      iteration 2/3: 31.6103 seconds
+      iteration 3/3: 31.4503 seconds
+    mean time over 3 iterations: 31.5816 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 16.8630 seconds
-      iteration 2/3: 15.8984 seconds
-      iteration 3/3: 15.9794 seconds
-    mean time over 3 iterations: 16.2469 seconds
+      iteration 1/3: 14.9370 seconds
+      iteration 2/3: 15.9975 seconds
+      iteration 3/3: 15.1069 seconds
+    mean time over 3 iterations: 15.3472 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 131.4059 seconds
-      iteration 2/3: 130.9731 seconds
-      iteration 3/3: 132.3988 seconds
-    mean time over 3 iterations: 131.5926 seconds
+      iteration 1/3: 131.5190 seconds
+      iteration 2/3: 130.8959 seconds
+      iteration 3/3: 131.3693 seconds
+    mean time over 3 iterations: 131.2614 seconds
 
-Figure 2 experiment took 2422.24 seconds
+Figure 2 experiment took 2405.64 seconds
 
 ============================================================
 Starting Cox experiment 'figure_3' | nbootstraps=1000 | n_iterations=3
@@ -253,129 +253,129 @@ Warming up packages with 500 patients...
 
 --- n_patients=500 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 3728 rows | simulation time: 0.1934 seconds
+  dataset: 3504 rows | simulation time: 0.1918 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 14.9251 seconds
-      iteration 2/3: 14.7795 seconds
-      iteration 3/3: 15.0332 seconds
-    mean time over 3 iterations: 14.9126 seconds
+      iteration 1/3: 14.6399 seconds
+      iteration 2/3: 14.3990 seconds
+      iteration 3/3: 13.5723 seconds
+    mean time over 3 iterations: 14.2037 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 181.9681 seconds
-      iteration 2/3: 181.5261 seconds
-      iteration 3/3: 182.0227 seconds
-    mean time over 3 iterations: 181.8390 seconds
+      iteration 1/3: 202.0458 seconds
+      iteration 2/3: 179.9956 seconds
+      iteration 3/3: 179.9154 seconds
+    mean time over 3 iterations: 187.3189 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 5.7590 seconds
-      iteration 2/3: 5.4280 seconds
-      iteration 3/3: 5.3180 seconds
-    mean time over 3 iterations: 5.5017 seconds
+      iteration 1/3: 5.5173 seconds
+      iteration 2/3: 5.2211 seconds
+      iteration 3/3: 5.2120 seconds
+    mean time over 3 iterations: 5.3168 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 144.6507 seconds
-      iteration 2/3: 128.5180 seconds
-      iteration 3/3: 122.4370 seconds
-    mean time over 3 iterations: 131.8686 seconds
+      iteration 1/3: 123.5255 seconds
+      iteration 2/3: 124.2047 seconds
+      iteration 3/3: 118.8321 seconds
+    mean time over 3 iterations: 122.1875 seconds
 
 --- n_patients=1000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 7327 rows | simulation time: 0.3815 seconds
+  dataset: 7248 rows | simulation time: 0.3574 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 15.1969 seconds
-      iteration 2/3: 14.6266 seconds
-      iteration 3/3: 14.1998 seconds
-    mean time over 3 iterations: 14.6744 seconds
+      iteration 1/3: 15.2171 seconds
+      iteration 2/3: 14.7404 seconds
+      iteration 3/3: 14.5249 seconds
+    mean time over 3 iterations: 14.8275 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 223.3176 seconds
-      iteration 2/3: 200.1946 seconds
-      iteration 3/3: 200.3502 seconds
-    mean time over 3 iterations: 207.9541 seconds
+      iteration 1/3: 202.7990 seconds
+      iteration 2/3: 200.1256 seconds
+      iteration 3/3: 200.9542 seconds
+    mean time over 3 iterations: 201.2929 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 8.9869 seconds
-      iteration 2/3: 8.7933 seconds
-      iteration 3/3: 8.6759 seconds
-    mean time over 3 iterations: 8.8187 seconds
+      iteration 1/3: 8.5983 seconds
+      iteration 2/3: 8.3158 seconds
+      iteration 3/3: 8.2745 seconds
+    mean time over 3 iterations: 8.3962 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 253.3719 seconds
-      iteration 2/3: 229.5298 seconds
-      iteration 3/3: 230.6181 seconds
-    mean time over 3 iterations: 237.8399 seconds
+      iteration 1/3: 231.2517 seconds
+      iteration 2/3: 226.6389 seconds
+      iteration 3/3: 227.7535 seconds
+    mean time over 3 iterations: 228.5480 seconds
 
 --- n_patients=5000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 37008 rows | simulation time: 1.9405 seconds
+  dataset: 36253 rows | simulation time: 1.9079 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 15.1754 seconds
-      iteration 2/3: 14.9063 seconds
-      iteration 3/3: 14.8259 seconds
-    mean time over 3 iterations: 14.9692 seconds
+      iteration 1/3: 15.3935 seconds
+      iteration 2/3: 15.1969 seconds
+      iteration 3/3: 15.4834 seconds
+    mean time over 3 iterations: 15.3580 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 326.5305 seconds
-      iteration 2/3: 297.7921 seconds
-      iteration 3/3: 296.8907 seconds
-    mean time over 3 iterations: 307.0711 seconds
+      iteration 1/3: 293.5510 seconds
+      iteration 2/3: 296.3280 seconds
+      iteration 3/3: 294.8722 seconds
+    mean time over 3 iterations: 294.9170 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 34.6604 seconds
-      iteration 2/3: 34.1363 seconds
-      iteration 3/3: 33.9000 seconds
-    mean time over 3 iterations: 34.2322 seconds
+      iteration 1/3: 32.1674 seconds
+      iteration 2/3: 32.6230 seconds
+      iteration 3/3: 32.3748 seconds
+    mean time over 3 iterations: 32.3884 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 830.8075 seconds
-      iteration 2/3: 819.6947 seconds
-      iteration 3/3: 817.7520 seconds
-    mean time over 3 iterations: 822.7514 seconds
+      iteration 1/3: 810.7362 seconds
+      iteration 2/3: 799.2422 seconds
+      iteration 3/3: 799.2842 seconds
+    mean time over 3 iterations: 803.0876 seconds
 
 --- n_patients=10000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 73067 rows | simulation time: 4.2248 seconds
+  dataset: 73646 rows | simulation time: 4.1856 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 16.5424 seconds
-      iteration 2/3: 15.4655 seconds
-      iteration 3/3: 14.7860 seconds
-    mean time over 3 iterations: 15.5980 seconds
+      iteration 1/3: 16.2994 seconds
+      iteration 2/3: 16.3279 seconds
+      iteration 3/3: 16.2988 seconds
+    mean time over 3 iterations: 16.3087 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 402.5869 seconds
-      iteration 2/3: 401.3755 seconds
-      iteration 3/3: 400.3096 seconds
-    mean time over 3 iterations: 401.4240 seconds
+      iteration 1/3: 417.3190 seconds
+      iteration 2/3: 415.0245 seconds
+      iteration 3/3: 408.0106 seconds
+    mean time over 3 iterations: 413.4514 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 86.7280 seconds
-      iteration 2/3: 67.5640 seconds
-      iteration 3/3: 68.1554 seconds
-    mean time over 3 iterations: 74.1491 seconds
+      iteration 1/3: 68.4752 seconds
+      iteration 2/3: 68.5347 seconds
+      iteration 3/3: 68.0180 seconds
+    mean time over 3 iterations: 68.3426 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 1459.4267 seconds
-      iteration 2/3: 1453.5412 seconds
-      iteration 3/3: 1453.1658 seconds
-    mean time over 3 iterations: 1455.3779 seconds
+      iteration 1/3: 1462.6607 seconds
+      iteration 2/3: 1459.5579 seconds
+      iteration 3/3: 1456.1752 seconds
+    mean time over 3 iterations: 1459.4646 seconds
 Generating 100000 patients in 2 batches of up to 50000...
-  batch 1/2 (50000 patients): 36.67s
-  batch 2/2 (50000 patients): 36.56s
-Total simulation time for 100000 patients: 73.23s
+  batch 1/2 (50000 patients): 36.48s
+  batch 2/2 (50000 patients): 36.47s
+Total simulation time for 100000 patients: 72.96s
 
 --- n_patients=100000 | n_constant=0 | n_time_dep=1 ---
   time_dep_1: beta=0.4055
-  dataset: 736634 rows | simulation time: 73.2293 seconds
+  dataset: 736775 rows | simulation time: 72.9577 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 71.7621 seconds
-      iteration 2/3: 71.8134 seconds
-      iteration 3/3: 71.9467 seconds
-    mean time over 3 iterations: 71.8407 seconds
+      iteration 1/3: 71.6532 seconds
+      iteration 2/3: 71.7163 seconds
+      iteration 3/3: 71.5438 seconds
+    mean time over 3 iterations: 71.6378 seconds
   > survivalgpu | dtype=float32 | device=cpu | n_iterations=3
-      iteration 1/3: 2373.7441 seconds
-      iteration 2/3: 2373.2154 seconds
-      iteration 3/3: 2369.0578 seconds
-    mean time over 3 iterations: 2372.0058 seconds
+      iteration 1/3: 2411.1832 seconds
+      iteration 2/3: 2432.6079 seconds
+      iteration 3/3: 2440.9537 seconds
+    mean time over 3 iterations: 2428.2482 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 928.3328 seconds
-      iteration 2/3: 1472.7390 seconds
-      iteration 3/3: 923.5286 seconds
-    mean time over 3 iterations: 1108.2001 seconds
+      iteration 1/3: 928.2788 seconds
+      iteration 2/3: 915.1109 seconds
+      iteration 3/3: 1170.4799 seconds
+    mean time over 3 iterations: 1004.6232 seconds
   > lifelines | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 12681.3832 seconds
-      iteration 2/3: 12586.1517 seconds
-      iteration 3/3: 12702.9430 seconds
-    mean time over 3 iterations: 12656.8260 seconds
+      iteration 1/3: 12665.3741 seconds
+      iteration 2/3: 12652.0518 seconds
+      iteration 3/3: 12774.6898 seconds
+    mean time over 3 iterations: 12697.3719 seconds
 
-Figure 3 experiment took 555.56 seconds
+Figure 3 experiment took 556.03 seconds
 
 ============================================================
 Starting Cox experiment 'figure_4' | nbootstraps=0 | n_iterations=3
@@ -391,250 +391,250 @@ Warming up packages with 500 patients...
 
 --- n_patients=500 | n_constant=1 | n_time_dep=0 ---
   constant_1: beta=0.4055
-  dataset: 500 rows | simulation time: 0.1589 seconds
+  dataset: 500 rows | simulation time: 0.1457 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.6180 seconds
-      iteration 2/3: 0.6114 seconds
-      iteration 3/3: 0.5978 seconds
-    mean time over 3 iterations: 0.6091 seconds
+      iteration 1/3: 0.5700 seconds
+      iteration 2/3: 0.6387 seconds
+      iteration 3/3: 0.6190 seconds
+    mean time over 3 iterations: 0.6092 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.0038 seconds
-      iteration 2/3: 0.0029 seconds
+      iteration 1/3: 0.0036 seconds
+      iteration 2/3: 0.0028 seconds
       iteration 3/3: 0.0027 seconds
-    mean time over 3 iterations: 0.0031 seconds
+    mean time over 3 iterations: 0.0030 seconds
   > xgboost | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.0034 seconds
-      iteration 2/3: 0.0031 seconds
-      iteration 3/3: 0.0030 seconds
-    mean time over 3 iterations: 0.0031 seconds
+      iteration 1/3: 0.0032 seconds
+      iteration 2/3: 0.0030 seconds
+      iteration 3/3: 0.0029 seconds
+    mean time over 3 iterations: 0.0030 seconds
   > torchsurv | dtype=float32 | device=cuda | n_iterations=3
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 1/3: 0.5795 seconds
+      iteration 1/3: 0.7087 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 2/3: 0.5717 seconds
+      iteration 2/3: 0.6861 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 3/3: 0.5697 seconds
-    mean time over 3 iterations: 0.5736 seconds
+      iteration 3/3: 0.6952 seconds
+    mean time over 3 iterations: 0.6966 seconds
 
 --- n_patients=1000 | n_constant=1 | n_time_dep=0 ---
   constant_1: beta=0.4055
-  dataset: 1000 rows | simulation time: 0.2972 seconds
+  dataset: 1000 rows | simulation time: 0.2844 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.6251 seconds
-      iteration 2/3: 0.6256 seconds
-      iteration 3/3: 0.6161 seconds
-    mean time over 3 iterations: 0.6222 seconds
+      iteration 1/3: 0.6093 seconds
+      iteration 2/3: 0.6013 seconds
+      iteration 3/3: 0.6234 seconds
+    mean time over 3 iterations: 0.6113 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.0039 seconds
-      iteration 2/3: 0.0032 seconds
+      iteration 1/3: 0.0038 seconds
+      iteration 2/3: 0.0031 seconds
       iteration 3/3: 0.0029 seconds
     mean time over 3 iterations: 0.0033 seconds
   > xgboost | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.0054 seconds
-      iteration 2/3: 0.0050 seconds
+      iteration 1/3: 0.0051 seconds
+      iteration 2/3: 0.0048 seconds
       iteration 3/3: 0.0046 seconds
-    mean time over 3 iterations: 0.0050 seconds
+    mean time over 3 iterations: 0.0048 seconds
   > torchsurv | dtype=float32 | device=cuda | n_iterations=3
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 1/3: 1.2051 seconds
+      iteration 1/3: 1.1347 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 2/3: 1.1892 seconds
+      iteration 2/3: 1.1019 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 3/3: 1.1990 seconds
-    mean time over 3 iterations: 1.1978 seconds
+      iteration 3/3: 1.0849 seconds
+    mean time over 3 iterations: 1.1072 seconds
 
 --- n_patients=5000 | n_constant=1 | n_time_dep=0 ---
   constant_1: beta=0.4055
-  dataset: 5000 rows | simulation time: 1.4989 seconds
+  dataset: 5000 rows | simulation time: 1.5106 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.6121 seconds
-      iteration 2/3: 0.5987 seconds
-      iteration 3/3: 0.6448 seconds
-    mean time over 3 iterations: 0.6185 seconds
+      iteration 1/3: 0.6034 seconds
+      iteration 2/3: 0.6196 seconds
+      iteration 3/3: 0.6150 seconds
+    mean time over 3 iterations: 0.6127 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.0061 seconds
-      iteration 2/3: 0.0055 seconds
+      iteration 1/3: 0.0058 seconds
+      iteration 2/3: 0.0053 seconds
       iteration 3/3: 0.0051 seconds
-    mean time over 3 iterations: 0.0056 seconds
+    mean time over 3 iterations: 0.0054 seconds
   > xgboost | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.0165 seconds
-      iteration 2/3: 0.0133 seconds
-      iteration 3/3: 0.0114 seconds
-    mean time over 3 iterations: 0.0137 seconds
+      iteration 1/3: 0.0164 seconds
+      iteration 2/3: 0.0138 seconds
+      iteration 3/3: 0.0096 seconds
+    mean time over 3 iterations: 0.0133 seconds
   > torchsurv | dtype=float32 | device=cuda | n_iterations=3
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 1/3: 3.6341 seconds
+      iteration 1/3: 8.1210 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 2/3: 3.7055 seconds
+      iteration 2/3: 8.0408 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 3/3: 3.6897 seconds
-    mean time over 3 iterations: 3.6764 seconds
+      iteration 3/3: 8.1592 seconds
+    mean time over 3 iterations: 8.1070 seconds
 
 --- n_patients=10000 | n_constant=1 | n_time_dep=0 ---
   constant_1: beta=0.4055
-  dataset: 10000 rows | simulation time: 3.3548 seconds
+  dataset: 10000 rows | simulation time: 3.3748 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.6140 seconds
-      iteration 2/3: 0.6187 seconds
-      iteration 3/3: 0.6065 seconds
-    mean time over 3 iterations: 0.6131 seconds
+      iteration 1/3: 0.6524 seconds
+      iteration 2/3: 0.6277 seconds
+      iteration 3/3: 0.6032 seconds
+    mean time over 3 iterations: 0.6278 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.0084 seconds
-      iteration 2/3: 0.0079 seconds
-      iteration 3/3: 0.0077 seconds
-    mean time over 3 iterations: 0.0080 seconds
+      iteration 1/3: 0.0087 seconds
+      iteration 2/3: 0.0078 seconds
+      iteration 3/3: 0.0079 seconds
+    mean time over 3 iterations: 0.0081 seconds
   > xgboost | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.0280 seconds
-      iteration 2/3: 0.0228 seconds
-      iteration 3/3: 0.0209 seconds
-    mean time over 3 iterations: 0.0239 seconds
+      iteration 1/3: 0.0243 seconds
+      iteration 2/3: 0.0184 seconds
+      iteration 3/3: 0.0221 seconds
+    mean time over 3 iterations: 0.0216 seconds
   > torchsurv | dtype=float32 | device=cuda | n_iterations=3
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 1/3: 6.5428 seconds
+      iteration 1/3: 6.5796 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 2/3: 6.6678 seconds
+      iteration 2/3: 6.5655 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 3/3: 6.5453 seconds
-    mean time over 3 iterations: 6.5853 seconds
+      iteration 3/3: 6.5565 seconds
+    mean time over 3 iterations: 6.5672 seconds
 Generating 100000 patients in 2 batches of up to 50000...
-  batch 1/2 (50000 patients): 32.43s
-  batch 2/2 (50000 patients): 32.35s
-Total simulation time for 100000 patients: 64.78s
+  batch 1/2 (50000 patients): 32.51s
+  batch 2/2 (50000 patients): 32.55s
+Total simulation time for 100000 patients: 65.05s
 
 --- n_patients=100000 | n_constant=1 | n_time_dep=0 ---
   constant_1: beta=0.4055
-  dataset: 100000 rows | simulation time: 64.7792 seconds
+  dataset: 100000 rows | simulation time: 65.0544 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.4081 seconds
-      iteration 2/3: 0.3852 seconds
-      iteration 3/3: 0.4028 seconds
-    mean time over 3 iterations: 0.3987 seconds
+      iteration 1/3: 0.4136 seconds
+      iteration 2/3: 0.3721 seconds
+      iteration 3/3: 0.5499 seconds
+    mean time over 3 iterations: 0.4452 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.0647 seconds
-      iteration 2/3: 0.0643 seconds
-      iteration 3/3: 0.0644 seconds
-    mean time over 3 iterations: 0.0645 seconds
+      iteration 1/3: 0.0643 seconds
+      iteration 2/3: 0.0638 seconds
+      iteration 3/3: 0.0646 seconds
+    mean time over 3 iterations: 0.0642 seconds
   > xgboost | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.2162 seconds
-      iteration 2/3: 0.2147 seconds
-      iteration 3/3: 0.1970 seconds
-    mean time over 3 iterations: 0.2093 seconds
+      iteration 1/3: 0.2141 seconds
+      iteration 2/3: 0.1971 seconds
+      iteration 3/3: 0.2131 seconds
+    mean time over 3 iterations: 0.2081 seconds
   > torchsurv | dtype=float32 | device=cuda | n_iterations=3
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 1/3: 76.7618 seconds
+      iteration 1/3: 61.4632 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 2/3: 76.9284 seconds
+      iteration 2/3: 61.2602 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 3/3: 76.7854 seconds
-    mean time over 3 iterations: 76.8252 seconds
+      iteration 3/3: 61.2303 seconds
+    mean time over 3 iterations: 61.3179 seconds
 Generating 500000 patients in 10 batches of up to 50000...
-  batch 1/10 (50000 patients): 32.59s
-  batch 2/10 (50000 patients): 32.47s
-  batch 3/10 (50000 patients): 32.48s
-  batch 4/10 (50000 patients): 32.51s
-  batch 5/10 (50000 patients): 32.45s
-  batch 6/10 (50000 patients): 32.50s
-  batch 7/10 (50000 patients): 32.45s
-  batch 8/10 (50000 patients): 32.49s
-  batch 9/10 (50000 patients): 32.46s
-  batch 10/10 (50000 patients): 32.44s
-Total simulation time for 500000 patients: 324.83s
+  batch 1/10 (50000 patients): 32.69s
+  batch 2/10 (50000 patients): 32.71s
+  batch 3/10 (50000 patients): 32.71s
+  batch 4/10 (50000 patients): 32.71s
+  batch 5/10 (50000 patients): 32.70s
+  batch 6/10 (50000 patients): 32.79s
+  batch 7/10 (50000 patients): 32.75s
+  batch 8/10 (50000 patients): 32.74s
+  batch 9/10 (50000 patients): 32.75s
+  batch 10/10 (50000 patients): 32.78s
+Total simulation time for 500000 patients: 327.32s
 
 --- n_patients=500000 | n_constant=1 | n_time_dep=0 ---
   constant_1: beta=0.4055
-  dataset: 500000 rows | simulation time: 324.8301 seconds
+  dataset: 500000 rows | simulation time: 327.3211 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.5091 seconds
-      iteration 2/3: 0.5244 seconds
-      iteration 3/3: 0.5284 seconds
-    mean time over 3 iterations: 0.5206 seconds
+      iteration 1/3: 0.5430 seconds
+      iteration 2/3: 0.5674 seconds
+      iteration 3/3: 0.6562 seconds
+    mean time over 3 iterations: 0.5888 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.3588 seconds
-      iteration 2/3: 0.3587 seconds
-      iteration 3/3: 0.3700 seconds
-    mean time over 3 iterations: 0.3625 seconds
+      iteration 1/3: 0.3525 seconds
+      iteration 2/3: 0.4855 seconds
+      iteration 3/3: 0.3532 seconds
+    mean time over 3 iterations: 0.3971 seconds
   > xgboost | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 1.0131 seconds
-      iteration 2/3: 0.9972 seconds
-      iteration 3/3: 0.9971 seconds
-    mean time over 3 iterations: 1.0025 seconds
+      iteration 1/3: 1.0563 seconds
+      iteration 2/3: 1.0525 seconds
+      iteration 3/3: 1.0535 seconds
+    mean time over 3 iterations: 1.0541 seconds
   > torchsurv | dtype=float32 | device=cuda | n_iterations=3
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 1/3: 315.5991 seconds
+      iteration 1/3: 474.9748 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 2/3: 312.5658 seconds
+      iteration 2/3: 471.3003 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 3/3: 312.4154 seconds
-    mean time over 3 iterations: 313.5268 seconds
+      iteration 3/3: 470.2782 seconds
+    mean time over 3 iterations: 472.1844 seconds
 Generating 1000000 patients in 20 batches of up to 50000...
-  batch 1/20 (50000 patients): 32.50s
-  batch 2/20 (50000 patients): 32.49s
-  batch 3/20 (50000 patients): 32.45s
-  batch 4/20 (50000 patients): 32.48s
-  batch 5/20 (50000 patients): 32.49s
-  batch 6/20 (50000 patients): 32.58s
-  batch 7/20 (50000 patients): 32.60s
-  batch 8/20 (50000 patients): 32.59s
-  batch 9/20 (50000 patients): 32.57s
+  batch 1/20 (50000 patients): 32.64s
+  batch 2/20 (50000 patients): 32.67s
+  batch 3/20 (50000 patients): 32.64s
+  batch 4/20 (50000 patients): 32.62s
+  batch 5/20 (50000 patients): 32.62s
+  batch 6/20 (50000 patients): 32.60s
+  batch 7/20 (50000 patients): 32.59s
+  batch 8/20 (50000 patients): 32.60s
+  batch 9/20 (50000 patients): 32.59s
   batch 10/20 (50000 patients): 32.58s
-  batch 11/20 (50000 patients): 32.57s
-  batch 12/20 (50000 patients): 32.56s
-  batch 13/20 (50000 patients): 32.57s
-  batch 14/20 (50000 patients): 32.56s
-  batch 15/20 (50000 patients): 32.58s
-  batch 16/20 (50000 patients): 32.56s
-  batch 17/20 (50000 patients): 32.53s
-  batch 18/20 (50000 patients): 32.58s
-  batch 19/20 (50000 patients): 32.60s
-  batch 20/20 (50000 patients): 32.61s
-Total simulation time for 1000000 patients: 651.05s
+  batch 11/20 (50000 patients): 32.60s
+  batch 12/20 (50000 patients): 32.63s
+  batch 13/20 (50000 patients): 32.64s
+  batch 14/20 (50000 patients): 32.57s
+  batch 15/20 (50000 patients): 32.57s
+  batch 16/20 (50000 patients): 32.57s
+  batch 17/20 (50000 patients): 32.65s
+  batch 18/20 (50000 patients): 32.60s
+  batch 19/20 (50000 patients): 32.55s
+  batch 20/20 (50000 patients): 32.56s
+Total simulation time for 1000000 patients: 652.11s
 
 --- n_patients=1000000 | n_constant=1 | n_time_dep=0 ---
   constant_1: beta=0.4055
-  dataset: 1000000 rows | simulation time: 651.0531 seconds
+  dataset: 1000000 rows | simulation time: 652.1106 seconds
   > survivalgpu | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 0.6391 seconds
-      iteration 2/3: 0.7397 seconds
-      iteration 3/3: 0.7774 seconds
-    mean time over 3 iterations: 0.7187 seconds
+      iteration 1/3: 0.6749 seconds
+      iteration 2/3: 0.7261 seconds
+      iteration 3/3: 0.6853 seconds
+    mean time over 3 iterations: 0.6954 seconds
   > survival | dtype=float64 | device=cpu | n_iterations=3
-      iteration 1/3: 0.7325 seconds
-      iteration 2/3: 0.7318 seconds
-      iteration 3/3: 0.7339 seconds
-    mean time over 3 iterations: 0.7327 seconds
+      iteration 1/3: 0.8513 seconds
+      iteration 2/3: 0.8732 seconds
+      iteration 3/3: 0.8648 seconds
+    mean time over 3 iterations: 0.8631 seconds
   > xgboost | dtype=float32 | device=cuda | n_iterations=3
-      iteration 1/3: 2.0032 seconds
-      iteration 2/3: 2.0018 seconds
-      iteration 3/3: 2.0272 seconds
-    mean time over 3 iterations: 2.0107 seconds
+      iteration 1/3: 2.1344 seconds
+      iteration 2/3: 2.1310 seconds
+      iteration 3/3: 2.1285 seconds
+    mean time over 3 iterations: 2.1313 seconds
   > torchsurv | dtype=float32 | device=cuda | n_iterations=3
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 1/3: 628.1382 seconds
+      iteration 1/3: 790.1345 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 2/3: 626.7881 seconds
+      iteration 2/3: 789.0021 seconds
 /home/dev/survivalgpu_replication_material/cox_functions.py:267: UserWarning: Ties in `time` detected; using efron method to handle ties.
   loss = neg_partial_log_likelihood(log_hz, ev, t, ties_method=ties)
-      iteration 3/3: 623.7431 seconds
-    mean time over 3 iterations: 626.2232 seconds
+      iteration 3/3: 787.7832 seconds
+    mean time over 3 iterations: 788.9733 seconds
 
-Figure 4 experiment took 4194.87 seconds
+Figure 4 experiment took 5131.78 seconds
