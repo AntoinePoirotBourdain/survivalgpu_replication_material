@@ -8,8 +8,10 @@ acceleration.
 ## Installation
 
 The Python package `survivalgpu` and the R package `survivalGPU` are
-installed from their source packages, provided in this directory:
-`survivalgpu-0.2.0.tar.gz` and `survivalGPU_0.1.0.tar.gz`.
+installed from their source packages, `survivalgpu-0.2.0.tar.gz` and
+`survivalGPU_0.1.0.tar.gz`, provided separately from this replication
+material. Copy both files into this directory
+(`survivalgpu_replication_material`) before running the commands below.
 
 ### Python
 
