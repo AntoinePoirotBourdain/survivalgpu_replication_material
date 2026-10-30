@@ -8,7 +8,9 @@ version = "0.1.0"
 description = "Replication material (figures, tables, benchmarks) for the survivalGPU paper"
 readme = "README.md"
 requires-python = ">= 3.10"
+# survivalgpu is installed from its source package first, see README.md.
 dependencies = [
+  "survivalgpu[wce]==0.2.0",
   "numpy",
   "pandas",
   "matplotlib",
@@ -18,10 +20,6 @@ dependencies = [
   "xgboost",
   "rpy2",
 ]
-
-# The survivalgpu package itself is NOT listed here: it lives in the sibling
-# survivalGPU repository and is installed separately, see README.md
-# (pip install -e ../survivalGPU[all]).
 
 [tool.setuptools]
 py-modules = ["cox_functions", "wce_functions", "simulation_functions"]

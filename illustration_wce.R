@@ -17,7 +17,8 @@ cutoff <- 180
 fit <- wceGPU(
   data = drugdata, id = "Id", event = "Event", start = "Start",
   stop = "Stop", expos = "dose", covariates = c("age", "sex"),
-  nknots = 1:3, cutoff = cutoff, constrained = "Right", x = TRUE, device = "cpu"
+  nknots = 1:3, cutoff = cutoff, 
+  constrained = "Right", x = TRUE, device = "cpu"
 )
 
 summary(fit)
@@ -25,7 +26,7 @@ summary(fit)
 fit_unconstrained <- wceGPU(
   data = drugdata, id = "Id", event = "Event", start = "Start",
   stop = "Stop", expos = "dose", covariates = c("age", "sex"),
-  nknots = 1:3, cutoff = cutoff, constrained = "None", x = TRUE, device = "cpu"
+  nknots = 1:3, cutoff = cutoff, constrained = FALSE, x = TRUE, device = "cpu"
 )
 
 summary(fit_unconstrained)

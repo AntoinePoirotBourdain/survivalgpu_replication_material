@@ -7,9 +7,9 @@ acceleration.
 
 ## Installation
 
-The `survivalgpu` package lives in the sibling `survivalGPU` repository.
-Clone it next to this one, so that `survivalGPU/` and
-`survivalgpu_replication_material/` are sibling directories.
+The Python package `survivalgpu` and the R package `survivalGPU` are
+installed from their source packages, provided in this directory:
+`survivalgpu-0.2.0.tar.gz` and `survivalGPU_0.1.0.tar.gz`.
 
 ### Python
 
@@ -22,11 +22,12 @@ python3 -m venv .venv
 source .venv/bin/activate  # on Windows: .venv\Scripts\activate
 ```
 
-Then install survivalGPU (with the `wce` extra, which adds `pykeops`) and
-this repository:
+Install `survivalgpu` from its source package, with the `wce` extra (which
+adds `pykeops`), then the code of this directory and its other
+dependencies, listed in `pyproject.toml`:
 
 ```bash
-pip install -e "../survivalGPU[wce]"
+pip install "./survivalgpu-0.2.0.tar.gz[wce]"
 pip install -e .
 ```
 
@@ -43,30 +44,63 @@ code that calls R through `rpy2` need R >= 4.1 and these packages:
 | --- | --- |
 | `survival` | reference Cox fits (validation), `illustration_cox.R` |
 | `WCE` | reference WCE fits (validation/benchmarks), `drugdata` in `illustration_wce.R` |
-| `survminer` | plots in `illustration_cox.R` |
+| `survminer` | plot in `illustration_cox.R` |
+| `dplyr` | `illustration_cox.R` |
 | `reticulate` | used by the survivalGPU R package to call Python |
-| `remotes` | installing the survivalGPU R package below |
 
 ```r
-install.packages(c("survival", "WCE", "survminer", "reticulate", "remotes"))
+install.packages(c("survival", "WCE", "survminer", "dplyr", "reticulate"))
 ```
 
-The survivalGPU R package is a thin wrapper around the Python package
-installed above, calling into it via `reticulate`. Install it from the
-sibling clone:
+Then install the survivalGPU R package from its source package, from this
+directory:
 
 ```r
-remotes::install_local("../survivalGPU/R")
+install.packages("survivalGPU_0.1.0.tar.gz", repos = NULL, type = "source")
 ```
 
-By default, `reticulate` picks its own Python interpreter, which may not
-have `survivalgpu` installed. Point it at the virtual environment created
-in the Python setup step by setting `RETICULATE_PYTHON` before launching R
-(from this directory):
+The R package includes its own copy of the Python code of `survivalgpu`,
+and calls it through `reticulate`, with the Python packages (`torch`,
+`pykeops`, ...) of the virtual environment created above. By default,
+`reticulate` picks its own Python interpreter, which may not have these
+packages. Point it at that virtual environment by setting
+`RETICULATE_PYTHON` before launching R (from this directory):
 
 ```bash
 export RETICULATE_PYTHON="$PWD/.venv/bin/python"
 ```
+
+## Computing environment
+
+The results in `results/`, `figures/` and `logs/`, and the timings below,
+were obtained on this machine:
+
+| | |
+| --- | --- |
+| CPU | Intel Xeon W-2255 (3.70 GHz) |
+| GPU | NVIDIA GeForce RTX 3090 (24 GB), driver 535.274.02 |
+| OS | Linux 6.2 (host), Ubuntu 24.04 (container) |
+
+The code ran in a Singularity container built from the KeOps Docker image
+`getkeops/keops-full:2.3-geomloss0.2.6-cuda12.8.1-pytorch2.8.0-python3.13`
+(<https://github.com/getkeops/keops>):
+
+```bash
+singularity build keops-full.sif docker://getkeops/keops-full:2.3-geomloss0.2.6-cuda12.8.1-pytorch2.8.0-python3.13
+```
+
+This image provides Python 3.13.0 with `torch` 2.8.0 (CUDA 12.8), `numpy`
+2.3.1, `pandas` 2.3.2, `matplotlib` 3.10.0, `pykeops` 2.3 and `rpy2` 3.6.2,
+and R 4.3.3 with `dplyr` 1.1.4. The other packages were installed in the
+container:
+
+| | Packages added to the image |
+| --- | --- |
+| Python | `survivalgpu` 0.1.0, `lifelines` 0.30.3, `torchsurv` 0.1.6, `xgboost` 3.2.0 |
+| R | `survival` 3.8-6, `WCE` 1.0.4, `reticulate` 1.46.0, `survminer` |
+
+`survival`, `WCE` and `reticulate` are also in the image, in older versions
+(3.5-8, 1.0.3 and 1.35.0); the versions above were installed over them.
 
 ## Reproducing the paper's figures and tables
 
