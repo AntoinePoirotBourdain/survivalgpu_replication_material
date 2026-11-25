@@ -101,10 +101,10 @@ def cox_r_survival_bootstrap(start, stop, event, covariates, dataset, ties, pati
     """Fits a Cox PH model with R's `survival::coxph`, then refits it on
     `nbootstraps` patient-level bootstrap resamples run in parallel.
 
-    The resamples are distributed over `n_cores` forked R processes with
-    `parallel::mclapply` (Linux/macOS only). Each resample draws patients
-    with replacement and keeps all the rows of each drawn patient, like the
-    `survivalgpu` bootstrap.
+    The resamples are run with `boot::boot(parallel = "multicore")`, over
+    `n_cores` forked R processes (Linux/macOS only). `boot` resamples a
+    one-row-per-patient table, and each drawn patient keeps all its rows,
+    like the `survivalgpu` bootstrap.
 
     Args:
         start (str or None): name of the "start" time column, or None for a
@@ -138,24 +138,24 @@ def cox_r_survival_bootstrap(start, stop, event, covariates, dataset, ties, pati
 
     time_start = time.time()
     ro.r("library(survival)")
-    ro.r(f"fit <- coxph({surv} ~ {covariate_formula}, data=dataset, ties='{ties}')")
+    ro.r("library(boot)")
     ro.r(f"""
         rows_by_patient <- split(seq_len(nrow(dataset)), dataset${patient})
-        boot_coef <- parallel::mclapply(seq_len({int(nbootstraps)}), function(b) {{
-            drawn <- sample(length(rows_by_patient), replace = TRUE)
-            boot_data <- dataset[unlist(rows_by_patient[drawn], use.names = FALSE), ]
+        patients_df <- data.frame(id = seq_along(rows_by_patient))
+        cox_boot_fun <- function(p, i) {{
+            boot_data <- dataset[unlist(rows_by_patient[p$id[i]], use.names = FALSE), ]
             coef(coxph({surv} ~ {covariate_formula}, data = boot_data, ties = '{ties}'))
-        }}, mc.cores = n_cores)
-        boot_failed <- sum(vapply(boot_coef, function(x) inherits(x, "try-error") || is.null(x), logical(1)))
+        }}
+        boot_res <- boot(patients_df, cox_boot_fun, R = {int(nbootstraps)}, parallel = "multicore", ncpus = n_cores)
+        boot_ok <- is.numeric(boot_res$t) && !anyNA(boot_res$t)
     """)
     time_stop = time.time()
     computation_time = time_stop - time_start
 
-    n_failed = int(ro.r("boot_failed")[0])
-    if n_failed > 0:
-        raise RuntimeError(f"{n_failed}/{nbootstraps} R bootstrap resamples failed")
+    if not ro.r("boot_ok")[0]:
+        raise RuntimeError("Some R bootstrap resamples failed")
 
-    coef_list = [ro.r("coef(fit)")[i] for i in range(len(covariates))]
+    coef_list = [ro.r("boot_res$t0")[i] for i in range(len(covariates))]
     return coef_list, computation_time
 
 
