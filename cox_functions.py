@@ -469,7 +469,8 @@ def run_cox_experiment(
     experiment_name,
     output_folder,
     n_patients_list,
-    covariate_specs,
+    covariate_combination,
+    beta_candidates,
     package_device_dtype_list,
     nbootstraps=0,
     batchsize=0,
@@ -477,22 +478,46 @@ def run_cox_experiment(
     max_time=365,
     seed=None,
 ):
-    """Run a Cox PH benchmark experiment.
+    """Benchmarks the computation time of Cox PH fits across packages.
 
-    Parameters
-    ----------
-    covariate_specs : list of list of (kind, HR) tuples
-        Each spec describes the covariates of one dataset, e.g.
-        [("constant", 1.5), ("time_dep", 2.0)]. `kind` is either
-        "constant" or "time_dep".
-    package_device_dtype_list : list of (package_name, device, dtype) tuples
-        E.g. [("survivalgpu", "cuda", np.float32), ("survival", "cpu", np.float64)]
+    For each combination of `n_patients_list` x `covariate_combination`, a
+    dataset is simulated with true coefficients drawn at random from
+    `beta_candidates` (see `simulate_random_cox_dataset`), then fit
+    `n_iterations` times with each (package, device, dtype) in
+    `package_device_dtype_list`. Mean computation times are written
+    incrementally to `<output_folder>/<experiment_name>.csv`.
+
+    Args:
+        experiment_name (str): name used for the output file name.
+        output_folder (str or Path): directory where results are written
+            (created if needed).
+        n_patients_list (list[int]): numbers of patients to simulate.
+        covariate_combination (list[tuple[int, int]]): list of
+            (n_constant, n_time_dep) covariate-count combinations.
+        beta_candidates (list[float]): candidate true regression coefficients
+            (log-hazard-ratio scale) drawn at random for each covariate of
+            each dataset.
+        package_device_dtype_list (list[tuple[str, str, numpy.dtype]]): e.g.
+            [("survivalgpu", "cuda", np.float32), ("survival", "cpu", np.float64)].
+        nbootstraps (int, optional): number of bootstrap resamples. Defaults to 0.
+        batchsize (int, optional): batch size, only used by "survivalgpu".
+            Defaults to 0.
+        n_iterations (int, optional): number of timed fits per package, the
+            reported time is their mean. Defaults to 3.
+        max_time (int, optional): maximum follow-up time for the simulated
+            datasets. Defaults to 365.
+        seed (int, optional): random seed, for reproducibility. Defaults to None.
+
+    Returns:
+        pandas.DataFrame: one row per (dataset, package, device, dtype), with
+            the mean computation time.
     """
     output_folder = Path(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)
     output_path = output_folder / f"{experiment_name}.csv"
 
     df_results = []
+    rng = np.random.default_rng(seed=seed)
 
     print(f"\n{'='*60}")
     print(f"Starting Cox experiment '{experiment_name}' | nbootstraps={nbootstraps} | n_iterations={n_iterations}")
@@ -522,40 +547,16 @@ def run_cox_experiment(
             dtype        = dtype,
         )
 
-    for dataset_idx, (n_patients, covariate_spec) in enumerate(
-        itertools.product(n_patients_list, covariate_specs)
-    ):
-        constant_betas = [np.log(hr) for kind, hr in covariate_spec if kind == "constant"]
-        td_betas = [np.log(hr) for kind, hr in covariate_spec if kind == "time_dep"]
-        n_constant = len(constant_betas)
-        n_time_dep = len(td_betas)
-
-        covariate_list, covariate_names = make_covariates(n_constant, n_time_dep, constant_betas + td_betas)
-        dataset_seed = None if seed is None else seed + dataset_idx
-
+    for n_patients, (n_constant, n_time_dep) in itertools.product(n_patients_list, covariate_combination):
         t_sim_start = time.time()
-        if n_patients >= 100000:
-            dataset = simulate_dataset_in_batches(
-                max_time=max_time,
-                n_patients=n_patients,
-                list_covariates=covariate_list,
-                batchsize=50000,
-                compress=True,
-                seed=dataset_seed,
-            )
-        else:
-            dataset = simulate_dataset(
-                max_time=max_time,
-                n_patients=n_patients,
-                list_covariates=covariate_list,
-                compress=True,
-                seed=dataset_seed,
-            )
+        dataset, covariate_names, true_betas = simulate_random_cox_dataset(
+            n_patients, n_constant, n_time_dep, beta_candidates, rng, max_time=max_time
+        )
         t_sim = time.time() - t_sim_start
 
         print(f"\n--- n_patients={n_patients} | n_constant={n_constant} | n_time_dep={n_time_dep} ---")
-        for cov in covariate_list:
-            print(f"  {cov.name}: beta={cov.coef:.4f}")
+        for name, beta in zip(covariate_names, true_betas):
+            print(f"  {name}: beta={beta:.4f}")
         print(f"  dataset: {len(dataset)} rows | simulation time: {t_sim:.4f} seconds")
 
         for package, device, dtype in package_device_dtype_list:
@@ -636,6 +637,53 @@ def make_covariates(n_constant, n_time_dep, betas):
     return covariates, covariate_names
 
 
+def simulate_random_cox_dataset(n_patients, n_constant, n_time_dep, beta_candidates, rng, max_time=365):
+    """Simulates a dataset whose true coefficients are drawn at random.
+
+    Shared by `run_cox_experiment` and `validation_experiment`. One beta per
+    covariate is drawn with replacement from `beta_candidates`, then a dataset
+    seed is drawn from `rng`. Datasets of 100000 patients or more are
+    simulated in batches (see `simulate_dataset_in_batches`).
+
+    Args:
+        n_patients (int): the number of patients to simulate.
+        n_constant (int): the number of constant covariates.
+        n_time_dep (int): the number of time-dependent covariates.
+        beta_candidates (list[float]): candidate true regression coefficients
+            (log-hazard-ratio scale).
+        rng (numpy.random.Generator): random generator used for the betas and
+            the dataset seed.
+        max_time (int, optional): maximum follow-up time. Defaults to 365.
+
+    Returns:
+        tuple[pandas.DataFrame, list[str], list[float]]: the simulated
+            dataset, the covariate names, and the true betas (same order).
+    """
+    true_betas = rng.choice(beta_candidates, size=n_constant + n_time_dep, replace=True).tolist()
+    covariates, covariate_names = make_covariates(n_constant, n_time_dep, true_betas)
+    dataset_seed = int(rng.integers(0, 2**31))
+
+    if n_patients >= 100000:
+        dataset = simulate_dataset_in_batches(
+            max_time=max_time,
+            n_patients=n_patients,
+            list_covariates=covariates,
+            batchsize=50000,
+            compress=True,
+            seed=dataset_seed,
+        )
+    else:
+        dataset = simulate_dataset(
+            max_time=max_time,
+            n_patients=n_patients,
+            list_covariates=covariates,
+            compress=True,
+            seed=dataset_seed,
+        )
+
+    return dataset, covariate_names, true_betas
+
+
 def validation_experiment(
     experiment_name,
     output_folder,
@@ -703,38 +751,16 @@ def validation_experiment(
 
     combo_iter = itertools.product(n_patients_list, covariate_combination)
     for combo_idx, (n_patients, (n_constant, n_time_dep)) in enumerate(combo_iter):
-        total_cov = n_constant + n_time_dep
         print(f"\n{'=' * 60}")
         print(f"Running n_patients={n_patients}, n_constant={n_constant}, n_time_dep={n_time_dep}")
         print(f"{'=' * 60}")
 
         for sim in range(n_simulations):
             sim_start = time.time()
-            random_betas = rng.choice(beta_candidates, size=total_cov, replace=True).tolist()
-            print(f"\n--- Simulation {sim + 1}/{n_simulations} | true_betas={[round(b, 4) for b in random_betas]} ---")
-
-            true_betas = random_betas
-            cov_defs, cov_names = make_covariates(n_constant, n_time_dep, true_betas)
-
-            dataset_seed = int(rng.integers(0, 2**31))
-
-            if n_patients >= 100000:
-                dataset = simulate_dataset_in_batches(
-                    max_time=max_time,
-                    n_patients=n_patients,
-                    list_covariates=cov_defs,
-                    batchsize=50000,
-                    compress=True,
-                    seed=dataset_seed,
-                )
-            else:
-                dataset = simulate_dataset(
-                    max_time=max_time,
-                    n_patients=n_patients,
-                    list_covariates=cov_defs,
-                    compress=True,
-                    seed=dataset_seed,
-                )
+            dataset, cov_names, true_betas = simulate_random_cox_dataset(
+                n_patients, n_constant, n_time_dep, beta_candidates, rng, max_time=max_time
+            )
+            print(f"\n--- Simulation {sim + 1}/{n_simulations} | true_betas={[round(b, 4) for b in true_betas]} ---")
 
             start_col = "start" if n_time_dep > 0 else None
 
