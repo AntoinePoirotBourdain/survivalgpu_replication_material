@@ -97,8 +97,69 @@ def cox_r_survival(start, stop, event, covariates, dataset, ties):
     return coef_list, computation_time
 
 
+def cox_r_survival_bootstrap(start, stop, event, covariates, dataset, ties, patient, nbootstraps, n_cores=None):
+    """Fits a Cox PH model with R's `survival::coxph`, then refits it on
+    `nbootstraps` patient-level bootstrap resamples run in parallel.
 
-def cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize = 0, nbootstraps = 0, device ="cpu", dtype = np.float32):
+    The resamples are distributed over `n_cores` forked R processes with
+    `parallel::mclapply` (Linux/macOS only). Each resample draws patients
+    with replacement and keeps all the rows of each drawn patient, like the
+    `survivalgpu` bootstrap.
+
+    Args:
+        start (str or None): name of the "start" time column, or None for a
+            single-record-per-subject (non time-varying) dataset.
+        stop (str): name of the "stop"/event-time column.
+        event (str): name of the event indicator column (1 = event, 0 = censored).
+        covariates (list[str]): names of the covariate columns.
+        dataset (pandas.DataFrame): the input dataset.
+        ties (str): the ties handling method, e.g. "breslow" or "efron".
+        patient (str): name of the patient id column.
+        nbootstraps (int): number of bootstrap resamples.
+        n_cores (int, optional): number of R processes used for the
+            resamples. Defaults to None, i.e. `parallel::detectCores()`.
+
+    Returns:
+        tuple[list[float], float]: the fitted coefficients on the original
+            dataset (in the same order as `covariates`) and the computation
+            time in seconds, covering the original fit and all the resamples.
+
+    Raises:
+        RuntimeError: if a bootstrap resample fails in R.
+    """
+    covariate_formula = " + ".join(covariates)
+    surv = f"Surv({stop}, {event})" if start is None else f"Surv({start}, {stop}, {event})"
+
+    with localconverter(ro.default_converter + pandas2ri.converter):
+        r_dataset = ro.conversion.py2rpy(dataset)
+
+    ro.globalenv["dataset"] = r_dataset
+    ro.globalenv["n_cores"] = ro.r("parallel::detectCores()") if n_cores is None else int(n_cores)
+
+    time_start = time.time()
+    ro.r("library(survival)")
+    ro.r(f"fit <- coxph({surv} ~ {covariate_formula}, data=dataset, ties='{ties}')")
+    ro.r(f"""
+        rows_by_patient <- split(seq_len(nrow(dataset)), dataset${patient})
+        boot_coef <- parallel::mclapply(seq_len({int(nbootstraps)}), function(b) {{
+            drawn <- sample(length(rows_by_patient), replace = TRUE)
+            boot_data <- dataset[unlist(rows_by_patient[drawn], use.names = FALSE), ]
+            coef(coxph({surv} ~ {covariate_formula}, data = boot_data, ties = '{ties}'))
+        }}, mc.cores = n_cores)
+        boot_failed <- sum(vapply(boot_coef, function(x) inherits(x, "try-error") || is.null(x), logical(1)))
+    """)
+    time_stop = time.time()
+    computation_time = time_stop - time_start
+
+    n_failed = int(ro.r("boot_failed")[0])
+    if n_failed > 0:
+        raise RuntimeError(f"{n_failed}/{nbootstraps} R bootstrap resamples failed")
+
+    coef_list = [ro.r("coef(fit)")[i] for i in range(len(covariates))]
+    return coef_list, computation_time
+
+
+def cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize = 0, nbootstraps = 0, device ="cpu", dtype = np.float32, patient = None):
     """Fits a Cox PH model with `survivalgpu.CoxPHSurvivalAnalysis`.
 
     Args:
@@ -117,12 +178,19 @@ def cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize = 0
         device (str, optional): "cpu" or "cuda". Defaults to "cpu".
         dtype (numpy.dtype, optional): floating point precision used for the
             covariates array. Defaults to np.float32.
+        patient (str, optional): name of the patient id column, so that
+            bootstrap resamples draw whole patients rather than rows. Only
+            used when `nbootstraps > 0`. Defaults to None.
 
     Returns:
         tuple[list[float], float]: the fitted coefficients of the first
             bootstrap sample (in the same order as `covariates`) and the
             computation time in seconds.
     """
+    if nbootstraps > 0 and patient is not None:
+        patient = pd.factorize(dataset[patient], sort=True)[0].astype(np.int64)
+    else:
+        patient = None
     start = np.array(dataset[start], dtype=np.int64) if start is not None else np.zeros(len(dataset), dtype=np.int64)
     stop = np.array(dataset[stop], dtype=np.int64)
     event = np.array(dataset[event], dtype=np.int64)
@@ -140,7 +208,7 @@ def cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize = 0
 
     time_start = time.time()
 
-    model.fit(start = start, stop = stop, event = event, covariates = covariates)
+    model.fit(start = start, stop = stop, event = event, covariates = covariates, patient = patient)
 
 
     time_stop = time.time()
@@ -407,15 +475,17 @@ def run_package_cox(
 def run_benchmark_bootstraps(
         package_name,
         start, stop, event, covariates, dataset, ties,
-        batchsize = 0, nbootstraps = 0, device ="cpu", dtype = np.float32
+        batchsize = 0, nbootstraps = 0, device ="cpu", dtype = np.float32,
+        patient = "patients", n_cores = None,
 ):
     """Runs a Cox PH fit, optionally with bootstrapping, for benchmarking purposes.
 
-    If `nbootstraps > 0` and the package is "survivalgpu" running on "cuda",
-    the bootstrap resamples are fit directly (a single timed call covering all
-    bootstraps). Otherwise, a single fit without bootstraps is timed and, if
-    `nbootstraps > 0`, its computation time is extrapolated by multiplying by
-    `nbootstraps + 1`.
+    If `nbootstraps > 0`, the bootstrap resamples are really fit for
+    "survivalgpu" (its own batched bootstrap, on CPU or GPU) and "survival"
+    (resamples run in parallel over `n_cores` R processes, see
+    `cox_r_survival_bootstrap`). For the other packages, a single fit
+    without bootstraps is timed and its computation time is extrapolated by
+    multiplying by `nbootstraps + 1`.
 
     Args:
         package_name (str): the package to use, see `run_package_cox`.
@@ -433,17 +503,25 @@ def run_benchmark_bootstraps(
         device (str, optional): "cpu" or "cuda". Defaults to "cpu".
         dtype (numpy.dtype, optional): floating point precision, only used by
             "survivalgpu". Defaults to np.float32.
+        patient (str, optional): name of the patient id column, used to draw
+            patient-level bootstrap resamples. Defaults to "patients".
+        n_cores (int, optional): number of R processes for the "survival"
+            bootstrap. Defaults to None, i.e. all the available cores.
 
     Returns:
         tuple[list[float], float]: the fitted coefficients (in the same order as
             `covariates`) and the (possibly extrapolated) computation time in
             seconds.
     """
-    if nbootstraps > 0 and package_name == "survivalgpu" and device == "cuda":
-        return cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize, nbootstraps, device, dtype)
+    if nbootstraps > 0 and package_name == "survivalgpu":
+        if device == "cuda" and not torch.cuda.is_available():
+            raise ValueError("CUDA is not available on this machine")
+        return cox_survivalgpu(start, stop, event, covariates, dataset, ties, batchsize, nbootstraps, device, dtype, patient)
 
-    # For all other cases (survivalgpu CPU, other packages, or no bootstraps):
-    # run a single iteration without bootstraps and extrapolate if needed.
+    if nbootstraps > 0 and package_name == "survival":
+        return cox_r_survival_bootstrap(start, stop, event, covariates, dataset, ties, patient, nbootstraps, n_cores)
+
+    # Other packages, or no bootstraps: run a single fit and extrapolate if needed.
     coef_list, computation_time = run_package_cox(
         package_name=package_name,
         start=start,
@@ -477,6 +555,7 @@ def run_cox_experiment(
     n_iterations=3,
     max_time=365,
     seed=None,
+    n_cores=None,
 ):
     """Benchmarks the computation time of Cox PH fits across packages.
 
@@ -507,6 +586,9 @@ def run_cox_experiment(
         max_time (int, optional): maximum follow-up time for the simulated
             datasets. Defaults to 365.
         seed (int, optional): random seed, for reproducibility. Defaults to None.
+        n_cores (int, optional): number of R processes used to run the
+            "survival" bootstrap resamples in parallel. Defaults to None,
+            i.e. all the available cores.
 
     Returns:
         pandas.DataFrame: one row per (dataset, package, device, dtype), with
@@ -520,7 +602,7 @@ def run_cox_experiment(
     rng = np.random.default_rng(seed=seed)
 
     print(f"\n{'='*60}")
-    print(f"Starting Cox experiment '{experiment_name}' | nbootstraps={nbootstraps} | n_iterations={n_iterations}")
+    print(f"Starting Cox experiment '{experiment_name}' | nbootstraps={nbootstraps} | n_iterations={n_iterations} | n_cores={n_cores}")
     print(f"{'='*60}")
 
     print("\nWarming up packages with 500 patients...")
@@ -576,6 +658,7 @@ def run_cox_experiment(
                     nbootstraps = nbootstraps,
                     device       = device,
                     dtype        = dtype,
+                    n_cores      = n_cores,
                 )
                 total_time += iter_time
                 print(f"      iteration {i+1}/{n_iterations}: {iter_time:.4f} seconds")
